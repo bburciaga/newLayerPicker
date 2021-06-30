@@ -14,28 +14,30 @@ import { AccordionActions } from "@material-ui/core";
 
 
 // todo:
-// change parent types also to be an array
-// make a 'getParentLayer' function that returns the parent object with a given id
-// look up Array.filter
-// make a 'getChildLayer' function that returns the child object with a given id
-// change parent accordion render to iterate over list
+// change parent types also to be an array                                              :DONE
+// make a 'getParentLayer' function that returns the parent object with a given id      :DONE
+// look up Array.filter                                                                 :DONE
+// make a 'getChildLayer' function that returns the child object with a given id        :DONE
+// change parent accordion render to iterate over list                                  :DONE
 
-const GEO_DATA = {
-  id: "water": {
+const GEO_DATA = [
+  {
+  id: "water",
   order: 1,
-    enabled: false,
-    children: [
-      {
-        type: "waterShed",
-        enabled: true
-      },
-      {
-        type: "waterStreams",
-        enabled: true
-      }
-    ]
+  enabled: false,
+  children: [
+    {
+      type: "waterShed",
+      enabled: true
+    },
+    {
+      type: "waterStreams",
+      enabled: true
+    }
+  ]
   },
-  land: {
+  {
+    id: "land",
     enabled: false,
     children: [
       {
@@ -52,7 +54,7 @@ const GEO_DATA = {
       }
     ]
   }
-};
+];
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -67,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [objectState, setObjectState] = React.useState(GEO_DATA);
-
+  /*
   const toggleWater = () => {
     setObjectState({
       ...objectState,
@@ -88,17 +90,29 @@ function App() {
         ]
       }
     });
-  };
+  };*/
 
 
 
-  const getChild = (parentType, childType) => {
-  // use array.filter here  objectState.
+  const getChild = (parentType: String, childType: String) => {
+    // use array.filter here  objectState.
+      var childData;
+    
+      objectState.filter(parent => {
+          if(parent.id === parentType){
+            childData = (parent.children.filter(child => child.type === childType))
+          }
+            
+      })
+      return childData;
   }
-
-  const getParent = (parentType) => {
+  //console.log(getChild("water","waterShed"));
+  const getParent = (parentType: String) => {
     // use array.filter here
+    return objectState.filter(idType =>
+      idType.id === parentType)
   }
+  //console.log(getParent("land"));
   /* const changeChild = (e) => {
     setChildState({
       ...childState,
@@ -113,51 +127,19 @@ function App() {
 
   return (
     <div className={classes.root}>
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="water-content"
-          id="water-heading"
-        >
-          <Button onClick={updateWaterChild1} variant="contained">
-            toggle water
-          </Button>
-          <Typography className={classes.heading}>Water</Typography>
-        </AccordionSummary>
-        {objectState.water.children && (
-          <>
-            {objectState.water.children.map((child) => (
-              <AccordionDetails>
-                <Button onClick={updateWaterChild1}>
-                  {JSON.stringify(child.type)}
-                </Button>
-              </AccordionDetails>
-            ))}
-          </>
-        )}
-      </Accordion>
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="land-content"
-          id="land-heading"
-        >
-          <Typography className={classes.heading}>Land</Typography>
-        </AccordionSummary>
-        {objectState.land.children && (
-          <>
-            {objectState.land.children.map((child) => (
-              <AccordionActions>
-                <Button key={child.type} {...child}>
-                  {JSON.stringify(child.type)}
-                </Button>
-              </AccordionActions>
-            ))}
-          </>
-        )}
-      </Accordion>
+      {objectState.map((parent) => (
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="water-content"
+            id={parent.id} >
+            <Typography className={classes.heading}>{parent.id}</Typography>
+          </AccordionSummary>
+        </Accordion>
+      ))}
+      <br />
 
-      <Button onClick={() => {}}>click me</Button>
+      <Button>click me</Button>
 
       <pre>{JSON.stringify(objectState, null, 2)}</pre>
     </div>
