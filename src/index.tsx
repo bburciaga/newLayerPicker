@@ -85,9 +85,28 @@ function App() {
    * @param parentType String variable
    * @returns object and its containing variables
    */
-  const getParent = (parentType: String) => {
+  const getParent = (parentType: string) => {
     // use array.filter here
     return objectState.filter((idType) => idType.id === parentType);
+  };
+  /**
+   * Used to get index of parent in JSON array
+   * @param parentType String variable
+   * @returns integer value
+   */
+  const getIndexByID = (id: string, inputArray: Object[]) => {
+    const sortedArray = [...inputArray].sort((a, b) => {
+      if ((a as any).order > (b as any).order) {
+        return 1;
+      }
+
+      if ((a as any).order < (b as any).order) {
+        return -1;
+      }
+
+      return 0;
+    });
+    return sortedArray.findIndex((x) => (x as any).id === id);
   };
 
   /**
@@ -95,8 +114,8 @@ function App() {
    * @param parentType String variable
    * @returns integer value
    */
-  const getParentIndex = (parentType: String) => {
-    return objectState.findIndex((x) => x.id === parentType);
+  const getParentIndex = (id: string) => {
+    return getIndexByID(id, objectState);
   };
 
   /**
@@ -105,9 +124,9 @@ function App() {
    * @param childType String variable to get Array value of child under the parent value
    * @returns integer value
    */
-  const getChildIndex = (parentType: String, childType: String) => {
-    let g = objectState[getParentIndex(parentType)];
-    return g.children.findIndex((x) => x.type === childType);
+  const getChildIndex = (parentType: string, childType: string) => {
+    let g = objectState[getParentIndex(parentType)].children;
+    return getIndexByID(childType, g);
   };
 
   /**
@@ -116,7 +135,7 @@ function App() {
    * @param childType String variable
    * @returns child component of parent children array
    */
-  const getChild = (parentType: String, childType: String) => {
+  const getChild = (parentType: string, childType: string) => {
     // use array.filter here  objectState.
     return objectState[getParentIndex(parentType)].children[
       getChildIndex(parentType, childType)
@@ -129,25 +148,23 @@ function App() {
    * Changes the enabled state to true or false. For checkboxes
    * @param parentType String variable
    */
-  const toggleParent = (parentType: String) => {
-    let parent = objectState[getParentIndex(parentType)];
+  const toggleParent = (parentType: string) => {
+    let parent = { ...objectState[getParentIndex(parentType)] };
     parent.enabled = !parent.enabled;
-    if (getParentIndex(parentType) === -1) console.log("error");
-    else {
-      setObjectState([
-        ...objectState.slice(0, getParentIndex(parentType)),
-        parent,
-        ...objectState.slice(getParentIndex(parentType) + 1),
-      ]);
-    }
+    const parentsBefore: Object[] = [];
+    const parentsAfter: Object[] = [];
+    setObjectState([...parentsBefore, parent, ...parentsAfter] as any);
   };
+
+  const getObjectsBeforeIndex = (index: number) => {};
+  const getObjectsAfterIndex = (index: number) => {};
 
   /**
    *
    * @param parentType
    * @param childType
    */
-  const toggleChild = (parentType: String, childType: String) => {
+  const toggleChild = (parentType: string, childType: string) => {
     let child = getChild(parentType, childType);
     child.enabled = !child.enabled;
     if (getChildIndex(parentType, childType) === -1) console.log("error");
