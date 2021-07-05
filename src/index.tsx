@@ -14,11 +14,8 @@ import "./styles.css";
 
 
 // todo:
-// change parent types also to be an array                                              :DONE
-// make a 'getParentLayer' function that returns the parent object with a given id      :DONE
-// look up Array.filter                                                                 :DONE
-// make a 'getChildLayer' function that returns the child object with a given id        :DONE
-// change parent accordion render to iterate over list                                  :DONE
+// sort array before slice
+// update child with parentType, childType
 
 const GEO_DATA = [
   {
@@ -98,6 +95,9 @@ function App() {
    * @returns integer value
    */
   const getParentIndex = (parentType: String) => {
+    const sortByID = {
+
+    }
     return objectState.findIndex(x => x.id === parentType);
   }
 
@@ -123,9 +123,16 @@ function App() {
     return objectState[getParentIndex(parentType)].children[getChildIndex(parentType,childType)];
   }
 
+  const updateParent = (parentType: String, fieldsToUpdate: Object[]) => {
+    const index = getParentIndex(parentType);
+    const parentsBefore = []
+    
+    if(index === 0) {
+
+    }
+  };
   
-  var x = getChild("water","waterStreams")
-  console.log(x.enabled)
+  updateParent("water", objectState);
   /**
    * Changes the enabled state to true or false. For checkboxes
    * @param parentType String variable
@@ -140,9 +147,9 @@ function App() {
         [...objectState.slice(0,getParentIndex(parentType)),
         parent, ...objectState.slice(getParentIndex(parentType)+1)]
       );
-    }
-  }
-
+    };
+  };
+  
   /**
    * 
    * @param parentType 
