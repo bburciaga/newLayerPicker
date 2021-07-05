@@ -7,11 +7,10 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 import "./styles.css";
-
 
 // todo:
 // change parent types also to be an array                                              :DONE
@@ -22,23 +21,23 @@ import "./styles.css";
 
 const GEO_DATA = [
   {
-  id: "water",
-  order: 1,
-  enabled: false,
-  children: [
-    {
-      type: "waterShed",
-      enabled: true
-    },
-    {
-      type: "waterStreams",
-      enabled: true
-    },
-    {
-      type: "waterBeds",
-      enabled: true
-    }
-  ]
+    id: "water",
+    order: 1,
+    enabled: false,
+    children: [
+      {
+        type: "waterShed",
+        enabled: true,
+      },
+      {
+        type: "waterStreams",
+        enabled: true,
+      },
+      {
+        type: "waterBeds",
+        enabled: true,
+      },
+    ],
   },
   {
     id: "land",
@@ -47,34 +46,34 @@ const GEO_DATA = [
     children: [
       {
         type: "forest",
-        enabled: false
+        enabled: false,
       },
       {
         type: "first nations",
-        enabled: true
+        enabled: true,
       },
       {
         type: "grassland",
-        enabled: true
-      }
-    ]
+        enabled: true,
+      },
+    ],
   },
   {
     id: "thing",
     order: 3,
     enabled: false,
-    children: []
-  }
+    children: [],
+  },
 ];
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%"
+    width: "100%",
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
-    fontWeight: theme.typography.fontWeightRegular
-  }
+    fontWeight: theme.typography.fontWeightRegular,
+  },
 }));
 
 function App() {
@@ -82,24 +81,23 @@ function App() {
   const [objectState, setObjectState] = useState(GEO_DATA);
 
   /**
-   * 
+   *
    * @param parentType String variable
    * @returns object and its containing variables
    */
   const getParent = (parentType: String) => {
     // use array.filter here
-    return objectState.filter(idType =>
-      idType.id === parentType)
-  }
-  
+    return objectState.filter((idType) => idType.id === parentType);
+  };
+
   /**
    * Used to get index of parent in JSON array
    * @param parentType String variable
    * @returns integer value
    */
   const getParentIndex = (parentType: String) => {
-    return objectState.findIndex(x => x.id === parentType);
-  }
+    return objectState.findIndex((x) => x.id === parentType);
+  };
 
   /**
    * Used to get index of child in parent children array
@@ -109,23 +107,24 @@ function App() {
    */
   const getChildIndex = (parentType: String, childType: String) => {
     let g = objectState[getParentIndex(parentType)];
-    return g.children.findIndex(x => x.type === childType);
-  }
-  
+    return g.children.findIndex((x) => x.type === childType);
+  };
+
   /**
-   * 
+   *
    * @param parentType String variable
    * @param childType String variable
    * @returns child component of parent children array
    */
-   const getChild = (parentType: String, childType: String) => {
+  const getChild = (parentType: String, childType: String) => {
     // use array.filter here  objectState.
-    return objectState[getParentIndex(parentType)].children[getChildIndex(parentType,childType)];
-  }
+    return objectState[getParentIndex(parentType)].children[
+      getChildIndex(parentType, childType)
+    ];
+  };
 
-  
-  var x = getChild("water","waterStreams")
-  console.log(x.enabled)
+  var x = getChild("water", "waterStreams");
+  console.log(x.enabled);
   /**
    * Changes the enabled state to true or false. For checkboxes
    * @param parentType String variable
@@ -133,30 +132,49 @@ function App() {
   const toggleParent = (parentType: String) => {
     let parent = objectState[getParentIndex(parentType)];
     parent.enabled = !parent.enabled;
-    if(getParentIndex(parentType) === -1)
-      console.log('error');
+    if (getParentIndex(parentType) === -1) console.log("error");
     else {
-      setObjectState(
-        [...objectState.slice(0,getParentIndex(parentType)),
-        parent, ...objectState.slice(getParentIndex(parentType)+1)]
-      );
+      setObjectState([
+        ...objectState.slice(0, getParentIndex(parentType)),
+        parent,
+        ...objectState.slice(getParentIndex(parentType) + 1),
+      ]);
     }
-  }
+  };
 
   /**
-   * 
-   * @param parentType 
-   * @param childType 
+   *
+   * @param parentType
+   * @param childType
    */
   const toggleChild = (parentType: String, childType: String) => {
-    let child = getChild(parentType,childType);
+    let child = getChild(parentType, childType);
     child.enabled = !child.enabled;
-    if(getChildIndex(parentType,childType) === -1)
-      console.log('error');
+    if (getChildIndex(parentType, childType) === -1) console.log("error");
     else {
-      
     }
-  }
+  };
+
+  const updateParent = (parentType: String, fieldsToUpdate: Object) => {};
+
+  const updateChild = (
+    parentType: String,
+    childType: String,
+    fieldsToUpdate: Object
+  ) => {
+    // sort parents, get index of parent
+    // sort child of specific parent, get index of child
+    // get old child and overwrite fields with fields in fieldsToUpdate
+    // const oldChild = objectState[parentIndex].children[childIndex]
+    // const updatedChild = {...oldChild, ...fieldsToUpdate}
+    // break up slicing into chunks:
+    // let parentsBeforeThisOne = []
+    // let parentsAFterThisOne = []
+    //spread to avoid reference issue when copying
+    // let ThisParent = { ...objectState[indexOfParent] }
+    //setObjectState([...parentsBeforeThisOne, thisOne, ...parentsAfterThisOne])
+  };
+
   /*
   const toggleWater = () => {
     setObjectState({
@@ -198,38 +216,47 @@ function App() {
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="water-content"
-            id={parent.id} >
+            id={parent.id}
+          >
             <FormControlLabel
               control={
-                <Checkbox 
+                <Checkbox
                   checked={parent.enabled}
                   onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                    toggleParent(parent.id)
-                  }} 
-                  name={parent.id} />}
-              className={classes.heading} label={parent.id} />
+                    toggleParent(parent.id);
+                  }}
+                  name={parent.id}
+                />
+              }
+              className={classes.heading}
+              label={parent.id}
+            />
           </AccordionSummary>
           {parent.children.map((child) => (
-            <AccordionDetails
-              id={child.type}>
-              &ensp;<FormControlLabel
-              control={
-                <Checkbox 
-                  checked={child.enabled}
-                  onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                    toggleChild(parent.id, child.type)
-                  }} 
-                  name={child.type} />}
-              className={classes.heading} label={child.type} />
+            <AccordionDetails id={child.type}>
+              &ensp;
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={child.enabled}
+                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                      toggleChild(parent.id, child.type);
+                    }}
+                    name={child.type}
+                  />
+                }
+                className={classes.heading}
+                label={child.type}
+              />
             </AccordionDetails>
           ))}
         </Accordion>
       ))}
       <br />
 
-      <Button onClick={() => (
-          toggleChild("water", "waterBeds")
-        )}>click me</Button>
+      <Button onClick={() => toggleChild("water", "waterBeds")}>
+        click me
+      </Button>
 
       <pre>{JSON.stringify(objectState, null, 2)}</pre>
     </div>
