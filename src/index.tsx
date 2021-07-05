@@ -26,15 +26,18 @@ const GEO_DATA = [
     enabled: false,
     children: [
       {
-        type: "waterShed",
+        id: "waterShed",
+        order: 1,
         enabled: true,
       },
       {
-        type: "waterStreams",
+        id: "waterStreams",
+        order: 2,
         enabled: true,
       },
       {
-        type: "waterBeds",
+        id: "waterBeds",
+        order: 3,
         enabled: true,
       },
     ],
@@ -45,15 +48,18 @@ const GEO_DATA = [
     enabled: true,
     children: [
       {
-        type: "forest",
+        id: "forest",
+        order: 1,
         enabled: false,
       },
       {
-        type: "first nations",
+        id: "first nations",
+        order: 2,
         enabled: true,
       },
       {
-        type: "grassland",
+        id: "grassland",
+        order: 3,
         enabled: true,
       },
     ],
@@ -79,6 +85,13 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(GEO_DATA);
+
+  const getObjectsBeforeIndex = (index: number) => { 
+    return [...objectState.slice(0,index)];
+  };
+  const getObjectsAfterIndex = (index: number) => {
+    return [...objectState.slice(index+1)]
+   };
 
   /**
    *
@@ -142,22 +155,18 @@ function App() {
     ];
   };
 
-  var x = getChild("water", "waterStreams");
-  console.log(x.enabled);
   /**
    * Changes the enabled state to true or false. For checkboxes
    * @param parentType String variable
    */
   const toggleParent = (parentType: string) => {
-    let parent = { ...objectState[getParentIndex(parentType)] };
+    let index = getParentIndex(parentType);
+    let parent = { ...objectState[index] };
     parent.enabled = !parent.enabled;
-    const parentsBefore: Object[] = [];
-    const parentsAfter: Object[] = [];
+    const parentsBefore: Object[] = [getObjectsBeforeIndex(index)];
+    const parentsAfter: Object[] = [getObjectsAfterIndex(index)];
     setObjectState([...parentsBefore, parent, ...parentsAfter] as any);
   };
-
-  const getObjectsBeforeIndex = (index: number) => {};
-  const getObjectsAfterIndex = (index: number) => {};
 
   /**
    *
@@ -165,33 +174,32 @@ function App() {
    * @param childType
    */
   const toggleChild = (parentType: string, childType: string) => {
-    let child = getChild(parentType, childType);
-    child.enabled = !child.enabled;
-    if (getChildIndex(parentType, childType) === -1) console.log("error");
-    else {
-    }
+    
   };
 
-  const updateParent = (parentType: String, fieldsToUpdate: Object) => {};
+  const updateParent = (parentType: string, fieldsToUpdate: Object) => { };
 
   const updateChild = (
-    parentType: String,
-    childType: String,
-    fieldsToUpdate: Object
+    parentType: string,
+    childType: string,
+    fieldsToUpdate: Object[]
   ) => {
     // sort parents, get index of parent
+    let pIndex = getParentIndex(parentType);
     // sort child of specific parent, get index of child
+    let cIndex = getChildIndex(parentType, childType);
     // get old child and overwrite fields with fields in fieldsToUpdate
-    // const oldChild = objectState[parentIndex].children[childIndex]
-    // const updatedChild = {...oldChild, ...fieldsToUpdate}
+    const oldChild = objectState[pIndex].children[cIndex];
+    const updatedChild = {...oldChild, ...fieldsToUpdate}
     // break up slicing into chunks:
-    // let parentsBeforeThisOne = []
-    // let parentsAFterThisOne = []
+    let parentsBefore = getObjectsBeforeIndex(pIndex);
+    let parentsAfter = getObjectsAfterIndex(pIndex);
     //spread to avoid reference issue when copying
-    // let ThisParent = { ...objectState[indexOfParent] }
-    //setObjectState([...parentsBeforeThisOne, thisOne, ...parentsAfterThisOne])
+    let thisParent = { ...objectState[pIndex] }
+    setObjectState([parentsBefore, thisParent, parentsAfter] as any)
   };
 
+  updateChild("water", "waterShed", objectState[0].children)
   /*
   const toggleWater = () => {
     setObjectState({
@@ -250,20 +258,20 @@ function App() {
             />
           </AccordionSummary>
           {parent.children.map((child) => (
-            <AccordionDetails id={child.type}>
+            <AccordionDetails id={child.id}>
               &ensp;
               <FormControlLabel
                 control={
                   <Checkbox
                     checked={child.enabled}
                     onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                      toggleChild(parent.id, child.type);
+                      toggleChild(parent.id, child.id);
                     }}
-                    name={child.type}
+                    name={child.id}
                   />
                 }
                 className={classes.heading}
-                label={child.type}
+                label={child.id}
               />
             </AccordionDetails>
           ))}
