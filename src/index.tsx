@@ -6,11 +6,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import "./styles.css";
-import { AccordionActions } from "@material-ui/core";
 
 
 // todo:
@@ -33,16 +33,21 @@ const GEO_DATA = [
     {
       type: "waterStreams",
       enabled: true
+    },
+    {
+      type: "waterBeds",
+      enabled: true
     }
   ]
   },
   {
     id: "land",
-    enabled: false,
+    order: 2,
+    enabled: true,
     children: [
       {
         type: "forest",
-        enabled: true
+        enabled: false
       },
       {
         type: "first nations",
@@ -53,6 +58,12 @@ const GEO_DATA = [
         enabled: true
       }
     ]
+  },
+  {
+    id: "thing",
+    order: 3,
+    enabled: false,
+    children: []
   }
 ];
 
@@ -68,7 +79,84 @@ const useStyles = makeStyles((theme) => ({
 
 function App() {
   const classes = useStyles();
-  const [objectState, setObjectState] = React.useState(GEO_DATA);
+  const [objectState, setObjectState] = useState(GEO_DATA);
+
+  /**
+   * 
+   * @param parentType String variable
+   * @returns object and its containing variables
+   */
+  const getParent = (parentType: String) => {
+    // use array.filter here
+    return objectState.filter(idType =>
+      idType.id === parentType)
+  }
+  
+  /**
+   * Used to get index of parent in JSON array
+   * @param parentType String variable
+   * @returns integer value
+   */
+  const getParentIndex = (parentType: String) => {
+    return objectState.findIndex(x => x.id === parentType);
+  }
+
+  /**
+   * Used to get index of child in parent children array
+   * @param parentType String variable to get Array value of parent
+   * @param childType String variable to get Array value of child under the parent value
+   * @returns integer value
+   */
+  const getChildIndex = (parentType: String, childType: String) => {
+    let g = objectState[getParentIndex(parentType)];
+    return g.children.findIndex(x => x.type === childType);
+  }
+  
+  /**
+   * 
+   * @param parentType String variable
+   * @param childType String variable
+   * @returns child component of parent children array
+   */
+   const getChild = (parentType: String, childType: String) => {
+    // use array.filter here  objectState.
+    return objectState[getParentIndex(parentType)].children[getChildIndex(parentType,childType)];
+  }
+
+  
+  var x = getChild("water","waterStreams")
+  console.log(x.enabled)
+  /**
+   * Changes the enabled state to true or false. For checkboxes
+   * @param parentType String variable
+   */
+  const toggleParent = (parentType: String) => {
+    let parent = objectState[getParentIndex(parentType)];
+    parent.enabled = !parent.enabled;
+    if(getParentIndex(parentType) === -1)
+      console.log('error');
+    else {
+      setObjectState(
+        [...objectState.slice(0,getParentIndex(parentType)),
+        parent, ...objectState.slice(getParentIndex(parentType)+1)]
+      );
+    }
+  }
+
+  /**
+   * 
+   * @param parentType 
+   * @param childType 
+   */
+  const toggleChild = (parentType: String, childType: String) => {
+    let child = getChild(parentType,childType);
+    child.enabled = !child.enabled;
+    if(getChildIndex(parentType,childType) === -1)
+      console.log('error');
+    else {
+      
+    }
+  }
   /*
   const toggleWater = () => {
     setObjectState({
@@ -91,28 +179,6 @@ function App() {
       }
     });
   };*/
-
-
-
-  const getChild = (parentType: String, childType: String) => {
-    // use array.filter here  objectState.
-      var childData;
-    
-      objectState.filter(parent => {
-          if(parent.id === parentType){
-            childData = (parent.children.filter(child => child.type === childType))
-          }
-            
-      })
-      return childData;
-  }
-  //console.log(getChild("water","waterShed"));
-  const getParent = (parentType: String) => {
-    // use array.filter here
-    return objectState.filter(idType =>
-      idType.id === parentType)
-  }
-  //console.log(getParent("land"));
   /* const changeChild = (e) => {
     setChildState({
       ...childState,
@@ -133,13 +199,37 @@ function App() {
             expandIcon={<ExpandMoreIcon />}
             aria-controls="water-content"
             id={parent.id} >
-            <Typography className={classes.heading}>{parent.id}</Typography>
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  checked={parent.enabled}
+                  onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                    toggleParent(parent.id)
+                  }} 
+                  name={parent.id} />}
+              className={classes.heading} label={parent.id} />
           </AccordionSummary>
+          {parent.children.map((child) => (
+            <AccordionDetails
+              id={child.type}>
+              &ensp;<FormControlLabel
+              control={
+                <Checkbox 
+                  checked={child.enabled}
+                  onChange={(e: React.FormEvent<HTMLInputElement>) => {
+                    toggleChild(parent.id, child.type)
+                  }} 
+                  name={child.type} />}
+              className={classes.heading} label={child.type} />
+            </AccordionDetails>
+          ))}
         </Accordion>
       ))}
       <br />
 
-      <Button>click me</Button>
+      <Button onClick={() => (
+          toggleChild("water", "waterBeds")
+        )}>click me</Button>
 
       <pre>{JSON.stringify(objectState, null, 2)}</pre>
     </div>
