@@ -224,7 +224,7 @@ function App(props: any) {
     </ListItemIcon>
   ))
 
-  const SortableItem = SortableElement(( text: any) => (
+  const SortableItem = SortableElement(( {text}: any) => (
     <ListItem ContainerComponent="div">
       <ListItemText primary={text} />
       <ListItemSecondaryAction>
@@ -233,9 +233,9 @@ function App(props: any) {
     </ListItem>
   ))
 
-  const SortableListContainer = SortableContainer(( items: any ) => (
+  const SortableListContainer = SortableContainer(( {items}: any ) => (
     <List>
-      {items.map((parent: any) => (
+      {(items).map((parent: any) => (
         <SortableItem key={parent.id} index={parent.order} text={parent.id} />
       ))}
     </List>
