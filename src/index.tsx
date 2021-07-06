@@ -90,15 +90,15 @@ function App() {
     return [...objectState.slice(0, index)];
   };
   const getObjectsAfterIndex = (index: number) => {
-    return [...objectState.slice(index + 1)]
+    return [...objectState.slice(index + 1)];
   };
 
   const getChildObjBeforeIndex = (pIndex: number, cIndex: number) => {
     return [...objectState[pIndex].children.slice(0, cIndex)];
-  }
+  };
   const getChildObjAfterIndex = (pIndex: number, cIndex: number) => {
-    return [...objectState[pIndex].children.slice(cIndex+1)];
-  }
+    return [...objectState[pIndex].children.slice(cIndex + 1)];
+  };
 
   /**
    *
@@ -180,16 +180,14 @@ function App() {
    * @param parentType
    * @param childType
    */
-  const toggleChild = (parentType: string, childType: string) => { };
+  const toggleChild = (parentType: string, childType: string) => {};
 
-  const updateParent = (parentType: string, fieldsToUpdate: Object) => { 
+  const updateParent = (parentType: string, fieldsToUpdate: Object) => {
     let pIndex = getParentIndex(parentType);
-    let parentsBefore: Object[] = [getObjectsBeforeIndex(pIndex)];
-    let parentsAfter: Object[] = [getObjectsAfterIndex(pIndex)];
+    let parentsBefore: Object[] = getObjectsBeforeIndex(pIndex);
+    let parentsAfter: Object[] = getObjectsAfterIndex(pIndex);
     const oldParent = getParent(parentType);
-    console.log(oldParent);
-    const updatedParent = {...oldParent, ...fieldsToUpdate};
-    console.log(updatedParent);
+    const updatedParent = { ...oldParent, ...fieldsToUpdate };
     setObjectState([...parentsBefore, updatedParent, ...parentsAfter] as any);
   };
 
@@ -204,19 +202,22 @@ function App() {
     let cIndex = getChildIndex(parentType, childType);
     // get old child and overwrite fields with fields in fieldsToUpdate
     const oldChild = getChild(parentType, childType);
-    const updatedChild = { ...oldChild, ...fieldsToUpdate }
+    const updatedChild = { ...oldChild, ...fieldsToUpdate };
     // break up slicing into chunks:
     let parentsBefore = getObjectsBeforeIndex(pIndex);
     let parentsAfter = getObjectsAfterIndex(pIndex);
     //spread to avoid reference issue when copying
     const oldParent = getParent(parentType);
-    
-    const childrenBefore = getChildObjBeforeIndex(pIndex,cIndex);
-    const childrenAfter = getChildObjAfterIndex(pIndex,cIndex);
-    
-    const newParent = { ...oldParent, children: [...childrenBefore, updatedChild, ...childrenAfter] };
-    
-    setObjectState([...parentsBefore, newParent, ...parentsAfter] as any)
+
+    const childrenBefore = getChildObjBeforeIndex(pIndex, cIndex);
+    const childrenAfter = getChildObjAfterIndex(pIndex, cIndex);
+
+    const newParent = {
+      ...oldParent,
+      children: [...childrenBefore, updatedChild, ...childrenAfter],
+    };
+
+    setObjectState([...parentsBefore, newParent, ...parentsAfter] as any);
   };
 
   /*
@@ -281,7 +282,11 @@ function App() {
               ))*/}
       <br />
 
-      <Button onClick={() => updateParent("water", {enabled: !getParent("water").enabled})}>
+      <Button
+        onClick={() =>
+          updateParent("water", { enabled: !getParent("water").enabled })
+        }
+      >
         click me
       </Button>
 
