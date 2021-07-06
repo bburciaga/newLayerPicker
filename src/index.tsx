@@ -10,6 +10,22 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
+/* Sortable List */
+import {
+  arrayMove,
+  SortableContainer,
+  SortableElement,
+  SortableHandle
+} from "react-sortable-hoc";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import DragHandleIcon from "@material-ui/icons/DragHandle";
+
+
+
 import "./styles.css";
 
 // todo:
@@ -201,8 +217,42 @@ function App(props: any) {
     setObjectState([...parentsBefore, newParent, ...parentsAfter] as any);
   };
 
+  /* Sortable List */
+  const DragHandle = SortableHandle(() => (
+    <ListItemIcon>
+      <DragHandleIcon />
+    </ListItemIcon>
+  ))
+
+  const SortableItem = SortableElement(( text: any) => (
+    <ListItem ContainerComponent="div">
+      <ListItemText primary={text} />
+      <ListItemSecondaryAction>
+        <DragHandle />
+      </ListItemSecondaryAction>
+    </ListItem>
+  ))
+
+  const SortableListContainer = SortableContainer(( items: any ) => (
+    <List>
+      {items.map((parent: any) => (
+        <SortableItem key={parent.id} index={parent.order} text={parent.id} />
+      ))}
+    </List>
+  ))
+
+  const onSortEnd = (oldIndex: number, newIndex: number) => {
+    setObjectState((parents: any) => arrayMove(parents, oldIndex, newIndex))
+  }
+
   return (
     <div className={classes.root}>
+      <SortableListContainer
+      items={objectState}
+      onSortEnd={onSortEnd}
+      useDragHandle={true}
+      lockAxis="y"
+    />
       {/*
       objectState.map((parent: any) => (
         <Accordion>
@@ -245,9 +295,6 @@ function App(props: any) {
           ))}
         </Accordion>
               ))*/}
-        {
-          
-        }
       <br />
 
       <Button
