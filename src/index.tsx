@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Children } from "react";
 import { render } from "react-dom";
 import Button from "@material-ui/core/Button";
 
@@ -86,12 +86,19 @@ function App() {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(GEO_DATA);
 
-  const getObjectsBeforeIndex = (index: number) => { 
-    return [...objectState.slice(0,index)];
+  const getObjectsBeforeIndex = (index: number) => {
+    return [...objectState.slice(0, index)];
   };
   const getObjectsAfterIndex = (index: number) => {
-    return [...objectState.slice(index+1)]
-   };
+    return [...objectState.slice(index + 1)]
+  };
+
+  const getChildObjBeforeIndex = (pIndex: number, cIndex: number) => {
+    return [...objectState[pIndex].children.slice(0, cIndex)];
+  }
+  const getChildObjAfterIndex = (pIndex: number, cIndex: number) => {
+    return [...objectState[pIndex].children.slice(cIndex+1)];
+  }
 
   /**
    *
@@ -100,7 +107,7 @@ function App() {
    */
   const getParent = (parentType: string) => {
     // use array.filter here
-    return objectState.filter((idType) => idType.id === parentType);
+    return objectState[getParentIndex(parentType)];
   };
   /**
    * Used to get index of parent in JSON array
@@ -173,40 +180,46 @@ function App() {
    * @param parentType
    * @param childType
    */
-  const toggleChild = (parentType: string, childType: string) => {
-    
-  };
+  const toggleChild = (parentType: string, childType: string) => { };
 
-  const updateParent = (parentType: string, fieldsToUpdate: Object) => { };
+  const updateParent = (parentType: string, fieldsToUpdate: Object) => { 
+    let pIndex = getParentIndex(parentType);
+    let parentsBefore: Object[] = [getObjectsBeforeIndex(pIndex)];
+    let parentsAfter: Object[] = [getObjectsAfterIndex(pIndex)];
+    const oldParent = getParent(parentType);
+    console.log(oldParent);
+    const updatedParent = {...oldParent, ...fieldsToUpdate};
+    console.log(updatedParent);
+    setObjectState([...parentsBefore, updatedParent, ...parentsAfter] as any);
+  };
 
   const updateChild = (
     parentType: string,
     childType: string,
-    fieldsToUpdate: Object[]
+    fieldsToUpdate: Object
   ) => {
     // sort parents, get index of parent
     let pIndex = getParentIndex(parentType);
     // sort child of specific parent, get index of child
     let cIndex = getChildIndex(parentType, childType);
     // get old child and overwrite fields with fields in fieldsToUpdate
-    const oldChild = objectState[pIndex].children[cIndex];
-    const updatedChild = {...oldChild, ...fieldsToUpdate}
+    const oldChild = getChild(parentType, childType);
+    const updatedChild = { ...oldChild, ...fieldsToUpdate }
     // break up slicing into chunks:
     let parentsBefore = getObjectsBeforeIndex(pIndex);
     let parentsAfter = getObjectsAfterIndex(pIndex);
     //spread to avoid reference issue when copying
-    let thisParent = { ...objectState[pIndex] }
-    setObjectState([parentsBefore, thisParent, parentsAfter] as any)
+    const oldParent = getParent(parentType);
+    
+    const childrenBefore = getChildObjBeforeIndex(pIndex,cIndex);
+    const childrenAfter = getChildObjAfterIndex(pIndex,cIndex);
+    
+    const newParent = { ...oldParent, children: [...childrenBefore, updatedChild, ...childrenAfter] };
+    
+    setObjectState([...parentsBefore, newParent, ...parentsAfter] as any)
   };
 
-  updateChild("water", "waterShed", objectState[0].children)
   /*
-  const toggleWater = () => {
-    setObjectState({
-      ...objectState,
-      water: { ...objectState.water, enabled: !objectState.water.enabled }
-    });
-  };
   const updateWaterChild1 = () => {
     setObjectState({
       ...objectState,
@@ -222,17 +235,6 @@ function App() {
       }
     });
   };*/
-  /* const changeChild = (e) => {
-    setChildState({
-      ...childState,
-      enabled: !childState.enabled
-    })
-  }
-  */
-  //console.log(childState)
-  /*const logHook = useEffect(() => {
-    console.log(JSON.stringify(objectState, null, 2));
-  }, [objectState]);*/
 
   return (
     <div className={classes.root}>
@@ -247,8 +249,8 @@ function App() {
               control={
                 <Checkbox
                   checked={parent.enabled}
-                  onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                    toggleParent(parent.id);
+                  onChange={() => {
+                    updateParent(parent.id, {enabled: !getParent(parent.id).enabled});
                   }}
                   name={parent.id}
                 />
@@ -259,13 +261,13 @@ function App() {
           </AccordionSummary>
           {parent.children.map((child) => (
             <AccordionDetails id={child.id}>
-              &ensp;
+              &emsp;
               <FormControlLabel
                 control={
                   <Checkbox
                     checked={child.enabled}
-                    onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                      toggleChild(parent.id, child.id);
+                    onChange={() => {
+                      updateChild(parent.id,child.id, {enabled: !getChild(parent.id,child.id).enabled} );
                     }}
                     name={child.id}
                   />
@@ -279,7 +281,7 @@ function App() {
       ))}
       <br />
 
-      <Button onClick={() => toggleChild("water", "waterBeds")}>
+      <Button onClick={() => updateChild("water", "waterShed", { enabled: !getChild("water","waterShed").enabled })}>
         click me
       </Button>
 
