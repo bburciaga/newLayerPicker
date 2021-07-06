@@ -238,7 +238,7 @@ function App() {
 
   return (
     <div className={classes.root}>
-      {objectState.map((parent) => (
+      {/*objectState.map((parent) => (
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -278,10 +278,10 @@ function App() {
             </AccordionDetails>
           ))}
         </Accordion>
-      ))}
+              ))*/}
       <br />
 
-      <Button onClick={() => updateChild("water", "waterShed", { enabled: !getChild("water","waterShed").enabled })}>
+      <Button onClick={() => updateParent("water", {enabled: !getParent("water").enabled})}>
         click me
       </Button>
 
