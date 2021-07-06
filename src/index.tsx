@@ -82,9 +82,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function App() {
+function App(props: any) {
   const classes = useStyles();
-  const [objectState, setObjectState] = useState(GEO_DATA);
+  const [objectState, setObjectState] = useState(props.data);
 
   const getObjectsBeforeIndex = (index: number) => {
     return [...objectState.slice(0, index)];
@@ -109,6 +109,7 @@ function App() {
     // use array.filter here
     return objectState[getParentIndex(parentType)];
   };
+
   /**
    * Used to get index of parent in JSON array
    * @param parentType String variable
@@ -162,26 +163,6 @@ function App() {
     ];
   };
 
-  /**
-   * Changes the enabled state to true or false. For checkboxes
-   * @param parentType String variable
-   */
-  const toggleParent = (parentType: string) => {
-    let index = getParentIndex(parentType);
-    let parent = { ...objectState[index] };
-    parent.enabled = !parent.enabled;
-    const parentsBefore: Object[] = [getObjectsBeforeIndex(index)];
-    const parentsAfter: Object[] = [getObjectsAfterIndex(index)];
-    setObjectState([...parentsBefore, parent, ...parentsAfter] as any);
-  };
-
-  /**
-   *
-   * @param parentType
-   * @param childType
-   */
-  const toggleChild = (parentType: string, childType: string) => {};
-
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
     let pIndex = getParentIndex(parentType);
     let parentsBefore: Object[] = getObjectsBeforeIndex(pIndex);
@@ -220,26 +201,10 @@ function App() {
     setObjectState([...parentsBefore, newParent, ...parentsAfter] as any);
   };
 
-  /*
-  const updateWaterChild1 = () => {
-    setObjectState({
-      ...objectState,
-      water: {
-        ...objectState.water,
-        children: [
-          ...objectState.water.children.slice(1),
-          {
-            ...objectState.water.children[0],
-            enabled: !objectState.water.children[0].enabled
-          }
-        ]
-      }
-    });
-  };*/
-
   return (
     <div className={classes.root}>
-      {/*objectState.map((parent) => (
+      {/*
+      objectState.map((parent: any) => (
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
@@ -251,7 +216,7 @@ function App() {
                 <Checkbox
                   checked={parent.enabled}
                   onChange={() => {
-                    updateParent(parent.id, {enabled: !getParent(parent.id).enabled});
+                    updateParent(parent.id, { enabled: !getParent(parent.id).enabled });
                   }}
                   name={parent.id}
                 />
@@ -260,7 +225,7 @@ function App() {
               label={parent.id}
             />
           </AccordionSummary>
-          {parent.children.map((child) => (
+          {parent.children.map((child: any) => (
             <AccordionDetails id={child.id}>
               &emsp;
               <FormControlLabel
@@ -268,7 +233,7 @@ function App() {
                   <Checkbox
                     checked={child.enabled}
                     onChange={() => {
-                      updateChild(parent.id,child.id, {enabled: !getChild(parent.id,child.id).enabled} );
+                      updateChild(parent.id, child.id, { enabled: !getChild(parent.id, child.id).enabled });
                     }}
                     name={child.id}
                   />
@@ -280,6 +245,9 @@ function App() {
           ))}
         </Accordion>
               ))*/}
+        {
+          
+        }
       <br />
 
       <Button
@@ -296,4 +264,4 @@ function App() {
 }
 
 const rootElement = document.getElementById("root");
-render(<App />, rootElement);
+render(<App data={GEO_DATA} />, rootElement);
