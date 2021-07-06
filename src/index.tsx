@@ -15,7 +15,7 @@ import {
   arrayMove,
   SortableContainer,
   SortableElement,
-  SortableHandle
+  SortableHandle,
 } from "react-sortable-hoc";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -23,8 +23,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DragHandleIcon from "@material-ui/icons/DragHandle";
-
-
 
 import "./styles.css";
 
@@ -95,6 +93,9 @@ const useStyles = makeStyles((theme) => ({
   heading: {
     fontSize: theme.typography.pxToRem(15),
     fontWeight: theme.typography.fontWeightRegular,
+  },
+  accordion: {
+    width: "100%",
   },
 }));
 
@@ -222,37 +223,41 @@ function App(props: any) {
     <ListItemIcon>
       <DragHandleIcon />
     </ListItemIcon>
-  ))
+  ));
 
-  const SortableItem = SortableElement(( {text}: any) => (
+  const SortableItem = SortableElement(({ text }: any) => (
     <ListItem ContainerComponent="div">
       <ListItemText primary={text} />
+      <Accordion className={classes.accordion}>
+        <AccordionSummary id={text}>test</AccordionSummary>
+        <AccordionDetails></AccordionDetails>
+      </Accordion>
       <ListItemSecondaryAction>
         <DragHandle />
       </ListItemSecondaryAction>
     </ListItem>
-  ))
+  ));
 
-  const SortableListContainer = SortableContainer(( {items}: any ) => (
+  const SortableListContainer = SortableContainer(({ items }: any) => (
     <List>
-      {(items).map((parent: any) => (
+      {items.map((parent: any) => (
         <SortableItem key={parent.id} index={parent.order} text={parent.id} />
       ))}
     </List>
-  ))
+  ));
 
   const onSortEnd = (oldIndex: number, newIndex: number) => {
-    setObjectState((parents: any) => arrayMove(parents, oldIndex, newIndex))
-  }
+    setObjectState((parents: any) => arrayMove(parents, oldIndex, newIndex));
+  };
 
   return (
     <div className={classes.root}>
       <SortableListContainer
-      items={objectState}
-      onSortEnd={onSortEnd}
-      useDragHandle={true}
-      lockAxis="y"
-    />
+        items={objectState}
+        onSortEnd={onSortEnd}
+        useDragHandle={true}
+        lockAxis="y"
+      />
       {/*
       objectState.map((parent: any) => (
         <Accordion>
