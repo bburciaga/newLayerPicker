@@ -80,7 +80,7 @@ const GEO_DATA = [
         id: "something",
         order: 1,
         enabled: true,
-      }
+      },
     ],
   },
 ];
@@ -124,6 +124,27 @@ function App(props: any) {
   const getParent = (parentType: string) => {
     // use array.filter here
     return objectState[getParentIndex(parentType)];
+  };
+
+  /**
+   *
+   * @param parentType String variable
+   * @returns object and its containing variables
+   */
+  const getParentByOrder = (order: number) => {
+    // use array.filter here
+    const sortedArray = [...objectState].sort((a, b) => {
+      if ((a as any).order > (b as any).order) {
+        return 1;
+      }
+
+      if ((a as any).order < (b as any).order) {
+        return -1;
+      }
+
+      return 0;
+    });
+    return sortedArray.findIndex((x) => (x as any).order === order);
   };
 
   /**
@@ -239,14 +260,52 @@ function App(props: any) {
 
   const SortableListContainer = SortableContainer(({ items }: any) => (
     <List>
-      {items.map((parent:{id:string,order:number}) => (
+      {items.map((parent: { id: string; order: number }) => (
         <SortableItem key={parent.id} index={parent.order} text={parent.id} />
       ))}
     </List>
   ));
 
-  const onSortEnd = ({oldIndex}:any, {newIndex}: any) => {
-    setObjectState((items: any) => arrayMove(items, oldIndex, newIndex));
+  const onSortEnd = ({ oldIndex, newIndex }: any) => {
+    console.log("oldIndex:  :" + oldIndex);
+    console.log("newIndex:  :" + newIndex);
+
+    if (newIndex > oldIndex) {
+      // 3 to 5
+      //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
+      //      [{ a: 1 }, { b: 2 }, { d: 3 }, { e: 4 }, { c: 5 },{ f: 6 }];
+
+      //update objects before old index left alone
+      let parentsBefore = getObjectsBeforeIndex(oldIndex);
+
+      // update objects between old index and new index decrease
+      //todo get inbetween
+      let loopIndex = oldIndex + 1;
+      let inBetween = [];
+      while (loopIndex < newIndex) {
+        let obj: any = getParentByOrder(loopIndex);
+        obj.order = obj.order + 1;
+        inBetween.push({ ...obj });
+        loopIndex += 1;
+      }
+
+      let objWeMoved: any = getParentByOrder(oldIndex);
+      objWeMoved.order = newIndex;
+
+      //leave objects after alone
+      let parentsAfter = getObjectsAfterIndex(newIndex);
+
+      setObjectState({
+        ...parentsBefore,
+        ...inBetween,
+        objWeMoved,
+        ...parentsAfter,
+      });
+    } else {
+      //update objects before new index left alone
+      //update between old and new increase
+      // objects after old index alone
+    }
   };
 
   return (
