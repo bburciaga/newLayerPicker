@@ -144,7 +144,7 @@ function App(props: any) {
 
       return 0;
     });
-    return sortedArray.findIndex((x) => (x as any).order === order);
+    return sortedArray.filter((x) => (x as any).order === order)[0];
   };
 
   /**
