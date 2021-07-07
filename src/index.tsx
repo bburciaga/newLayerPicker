@@ -29,56 +29,78 @@ import "./styles.css";
 const GEO_DATA = [
   {
     id: "water",
-    order: 1,
+    order: 0,
     enabled: false,
     children: [
       {
         id: "waterShed",
-        order: 1,
+        order: 0,
         enabled: true,
       },
       {
         id: "waterStreams",
-        order: 2,
+        order: 1,
         enabled: true,
       },
       {
         id: "waterBeds",
-        order: 3,
+        order: 2,
         enabled: true,
       },
     ],
   },
   {
     id: "land",
-    order: 2,
+    order: 1,
     enabled: true,
     children: [
       {
         id: "forest",
-        order: 1,
+        order: 0,
         enabled: false,
       },
       {
         id: "first nations",
-        order: 2,
+        order: 1,
         enabled: true,
       },
       {
         id: "grassland",
-        order: 3,
+        order: 2,
         enabled: true,
       },
     ],
   },
   {
     id: "thing",
-    order: 3,
+    order: 2,
     enabled: false,
     children: [
       {
         id: "something",
+        order: 0,
+        enabled: true,
+      },
+    ],
+  },
+  {
+    id: "notwater",
+    order: 3,
+    enabled: false,
+    children: [
+      {
+        id: "waterShed",
+        order: 0,
+        enabled: true,
+      },
+      {
+        id: "waterStreams",
         order: 1,
+        enabled: true,
+      },
+      {
+        id: "waterBeds",
+        order: 2,
         enabled: true,
       },
     ],
@@ -103,17 +125,21 @@ function App(props: any) {
   const [objectState, setObjectState] = useState(props.data);
 
   const getObjectsBeforeIndex = (index: number) => {
-    return [...objectState.slice(0, index)];
+    const sorted = sortArray(objectState);
+    return [...sorted.slice(0, index)];
   };
   const getObjectsAfterIndex = (index: number) => {
-    return [...objectState.slice(index + 1)];
+    const sorted = sortArray(objectState);
+    return [...sorted.slice(index + 1)];
   };
 
   const getChildObjBeforeIndex = (pIndex: number, cIndex: number) => {
-    return [...objectState[pIndex].children.slice(0, cIndex)];
+    const sorted = sortArray(objectState);
+    return [...(sorted[pIndex] as any).children.slice(0, cIndex)];
   };
   const getChildObjAfterIndex = (pIndex: number, cIndex: number) => {
-    return [...objectState[pIndex].children.slice(cIndex + 1)];
+    const sorted = sortArray(objectState);
+    return [...(sorted[pIndex] as any).children.slice(cIndex + 1)];
   };
 
   /**
@@ -124,6 +150,21 @@ function App(props: any) {
   const getParent = (parentType: string) => {
     // use array.filter here
     return objectState[getParentIndex(parentType)];
+  };
+
+  const sortArray = (inputArray: []) => {
+    const returnVal = [...inputArray].sort((a, b) => {
+      if ((a as any).order > (b as any).order) {
+        return 1;
+      }
+
+      if ((a as any).order < (b as any).order) {
+        return -1;
+      }
+
+      return 0;
+    });
+    return returnVal;
   };
 
   /**
@@ -144,7 +185,8 @@ function App(props: any) {
 
       return 0;
     });
-    return sortedArray.filter((x) => (x as any).order === order)[0];
+    const parent = sortedArray.filter((x) => (x as any).order === order)[0];
+    return { ...parent };
   };
 
   /**
@@ -271,6 +313,7 @@ function App(props: any) {
     console.log("newIndex:  :" + newIndex);
 
     if (newIndex > oldIndex) {
+      console.log("new index is bigger");
       // 3 to 5
       //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
       //      [{ a: 1 }, { b: 2 }, { d: 3 }, { e: 4 }, { c: 5 },{ f: 6 }];
@@ -281,8 +324,45 @@ function App(props: any) {
       // update objects between old index and new index decrease
       //todo get inbetween
       let loopIndex = oldIndex + 1;
-      let inBetween = [];
+      let inBetween: any[] = [];
       while (loopIndex < newIndex) {
+        let obj: any = getParentByOrder(loopIndex);
+        obj.order = obj.order - 1;
+        inBetween.push({ ...obj });
+        loopIndex += 1;
+      }
+
+      let objWeMoved: any = getParentByOrder(oldIndex);
+      objWeMoved.order = newIndex;
+
+      let objWeSwapped: any = getParentByOrder(newIndex);
+      objWeSwapped.order = newIndex - 1;
+
+      //leave objects after alone
+      let parentsAfter = getObjectsAfterIndex(newIndex);
+
+      const newState = [
+        ...parentsBefore,
+        ...inBetween,
+        objWeMoved,
+        objWeSwapped,
+        ...parentsAfter,
+      ];
+      console.log("newstate");
+      console.dir(newState);
+
+      setObjectState(newState);
+    } else if (newIndex < oldIndex) {
+      console.log("new index is smaller");
+      // 5 to 3
+      //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
+      //      [{ a: 1 }, { b: 2 }, { e: 3 }, { c: 4 }, { d: 5 }, ,{ f: 6 }];
+      let parentsBefore = getObjectsBeforeIndex(newIndex);
+
+      // update objects between old index and new index decrease
+      let loopIndex = newIndex + 1;
+      let inBetween: any[] = [];
+      while (loopIndex < oldIndex) {
         let obj: any = getParentByOrder(loopIndex);
         obj.order = obj.order + 1;
         inBetween.push({ ...obj });
@@ -292,26 +372,30 @@ function App(props: any) {
       let objWeMoved: any = getParentByOrder(oldIndex);
       objWeMoved.order = newIndex;
 
-      //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(newIndex);
+      let objWeSwapped: any = getParentByOrder(newIndex);
+      objWeSwapped.order = newIndex + 1;
 
-      setObjectState({
+      //leave objects after alone
+      let parentsAfter = getObjectsAfterIndex(oldIndex);
+
+      const newState = [
         ...parentsBefore,
         ...inBetween,
         objWeMoved,
+        objWeSwapped,
         ...parentsAfter,
-      });
-    } else {
-      //update objects before new index left alone
-      //update between old and new increase
-      // objects after old index alone
+      ];
+
+      console.log("newstate");
+      console.dir(newState);
+      setObjectState(newState);
     }
   };
 
   return (
     <div className={classes.root}>
       <SortableListContainer
-        items={objectState}
+        items={sortArray(objectState)}
         onSortEnd={onSortEnd}
         useDragHandle={true}
         lockAxis="y"
@@ -368,7 +452,7 @@ function App(props: any) {
         click me
       </Button>
 
-      <pre>{JSON.stringify(objectState, null, 2)}</pre>
+      <pre>{JSON.stringify(sortArray(objectState), null, 2)}</pre>
     </div>
   );
 }
