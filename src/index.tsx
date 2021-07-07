@@ -26,13 +26,6 @@ import DragHandleIcon from "@material-ui/icons/DragHandle";
 
 import "./styles.css";
 
-// todo:
-// change parent types also to be an array                                              :DONE
-// make a 'getParentLayer' function that returns the parent object with a given id      :DONE
-// look up Array.filter                                                                 :DONE
-// make a 'getChildLayer' function that returns the child object with a given id        :DONE
-// change parent accordion render to iterate over list                                  :DONE
-
 const GEO_DATA = [
   {
     id: "water",
@@ -82,7 +75,13 @@ const GEO_DATA = [
     id: "thing",
     order: 3,
     enabled: false,
-    children: [],
+    children: [
+      {
+        id: "something",
+        order: 1,
+        enabled: true,
+      }
+    ],
   },
 ];
 
@@ -240,14 +239,14 @@ function App(props: any) {
 
   const SortableListContainer = SortableContainer(({ items }: any) => (
     <List>
-      {items.map((parent: any) => (
+      {items.map((parent:{id:string,order:number}) => (
         <SortableItem key={parent.id} index={parent.order} text={parent.id} />
       ))}
     </List>
   ));
 
-  const onSortEnd = (oldIndex: number, newIndex: number) => {
-    setObjectState((parents: any) => arrayMove(parents, oldIndex, newIndex));
+  const onSortEnd = ({oldIndex}:any, {newIndex}: any) => {
+    setObjectState((items: any) => arrayMove(items, oldIndex, newIndex));
   };
 
   return (
