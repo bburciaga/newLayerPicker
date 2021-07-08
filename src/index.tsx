@@ -7,7 +7,7 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Checkbox from "@material-ui/core/Checkbox";
 /* HelperFiles */
 import {
@@ -21,8 +21,9 @@ import {
   getParent,
   getChild,
   getParentByOrder,
+  sortObject,
 } from "./Helpers/LayerPickerHelper";
-import data from './GEO_DATA.json';
+import data from "./GEO_DATA.json";
 /* Sortable List */
 import {
   SortableContainer,
@@ -47,19 +48,18 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: theme.typography.fontWeightRegular,
   },
   accordion: {
-    width: "100%"
+    width: "100%",
   },
   div: {
     display: "flex",
-    alignItems: "center"
-  }
+    alignItems: "center",
+  },
 }));
 
 function App(props: any) {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(props.data);
   const [progress, setProgress] = useState(props.progress);
-
 
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
     let pIndex = getParentIndex(objectState, parentType);
@@ -111,26 +111,36 @@ function App(props: any) {
       <ListItemText />
       <Accordion className={classes.accordion}>
         <div className={classes.div}>
-          <Checkbox checked={parent.enabled} name={parent.id}
+          <Checkbox
+            checked={parent.enabled}
+            name={parent.id}
             onChange={() => {
-              updateParent(parent.id, { enabled: !getParent(objectState, parent.id).enabled })
-            }} />
+              updateParent(parent.id, {
+                enabled: !getParent(objectState, parent.id).enabled,
+              });
+            }}
+          />
           <AccordionSummary className={classes.heading} id={parent.id}>
             {parent.id}
           </AccordionSummary>
           <div className="divR">
-          <CircularProgress variant="determinate" value={parent.loaded} />
+            <CircularProgress variant="determinate" value={parent.loaded} />
           </div>
         </div>
         {parent.children.map((child: any) => (
           <div className="classes.div">
             &emsp;
             <AccordionDetails>
-
-              <Checkbox checked={child.enabled} name={child.id}
+              <Checkbox
+                checked={child.enabled}
+                name={child.id}
                 onChange={() => {
-                  updateChild(parent.id, child.id, { enabled: !getChild(objectState, parent.id, child.id).enabled })
-                }} />
+                  updateChild(parent.id, child.id, {
+                    enabled: !getChild(objectState, parent.id, child.id)
+                      .enabled,
+                  });
+                }}
+              />
               {child.id}
               <CircularProgress variant="determinate" value={child.loaded} />
             </AccordionDetails>
@@ -152,89 +162,8 @@ function App(props: any) {
   ));
 
   const onSortEnd = ({ oldIndex, newIndex }: any) => {
-    if (newIndex > oldIndex) {
-      // 3 to 5
-      //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
-      //      [{ a: 1 }, { b: 2 }, { d: 3 }, { e: 4 }, { c: 5 },{ f: 6 }];
-
-      //update objects before old index left alone
-      let parentsBefore = getObjectsBeforeIndex(objectState, oldIndex);
-      console.log("parentsB4:", parentsBefore);
-
-      // update objects between old index and new index decrease
-      //todo get inbetween
-      let loopIndex = oldIndex + 1;
-      let inBetween: any[] = [];
-      while (loopIndex < newIndex) {
-        let obj: any = getParentByOrder(objectState, loopIndex);
-        obj.order = obj.order - 1;
-        inBetween.push({ ...obj });
-        loopIndex += 1;
-        console.log("obj:", obj);
-      }
-
-      let objWeMoved: any = getParentByOrder(objectState, oldIndex);
-      objWeMoved.order = newIndex;
-      console.log("objWeMoved: ", objWeMoved);
-
-      let objWeSwapped: any = getParentByOrder(objectState, newIndex);
-      objWeSwapped.order = newIndex - 1;
-      console.log("objWeSwapped: ", objWeSwapped);
-
-      //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(objectState, newIndex);
-      console.log("parentsAfter: ", parentsAfter);
-
-      const newState = [
-        ...parentsBefore,
-        ...inBetween,
-        objWeSwapped,
-        objWeMoved,
-        ...parentsAfter,
-      ];
-
-      console.log("newState: ", newState);
-      setObjectState(newState);
-    } else if (newIndex < oldIndex) {
-      // 5 to 3
-      //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
-      //      [{ a: 1 }, { b: 2 }, { e: 3 }, { c: 4 }, { d: 5 }, ,{ f: 6 }];
-      let parentsBefore = getObjectsBeforeIndex(objectState, newIndex);
-      console.log("parentsB4:", parentsBefore);
-      // update objects between old index and new index decrease
-      let loopIndex = newIndex + 1;
-      let inBetween: any[] = [];
-      while (loopIndex < oldIndex) {
-        let obj: any = getParentByOrder(objectState, loopIndex);
-        obj.order = obj.order + 1;
-        inBetween.push({ ...obj });
-        loopIndex += 1;
-        console.log("obj:", obj);
-      }
-
-      let objWeMoved: any = getParentByOrder(objectState, oldIndex);
-      objWeMoved.order = newIndex;
-      console.log("objWeMoved: ", objWeMoved);
-
-      let objWeSwapped: any = getParentByOrder(objectState, newIndex);
-      objWeSwapped.order = newIndex + 1;
-      console.log("objWeSwapped: ", objWeSwapped);
-
-      //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(objectState, oldIndex);
-      console.log("parentsAfter: ", parentsAfter);
-
-      const newState = [
-        ...parentsBefore,
-        ...inBetween,
-        objWeMoved,
-        objWeSwapped,
-        ...parentsAfter,
-      ];
-
-      console.log("newState: ", newState);
-      setObjectState(newState);
-    }
+    const returnVal = sortObject(objectState, oldIndex, newIndex);
+    setObjectState(returnVal);
   };
 
   return (
@@ -292,7 +221,9 @@ function App(props: any) {
 
       <Button
         onClick={() =>
-          updateParent("water", { enabled: !getParent(objectState, "water").enabled })
+          updateParent("water", {
+            enabled: !getParent(objectState, "water").enabled,
+          })
         }
       >
         click me
