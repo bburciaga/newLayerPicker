@@ -9,10 +9,22 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-
+/* HelperFiles */
+import { 
+  sortArray,
+  getObjectsBeforeIndex, 
+  getObjectsAfterIndex,
+  getChildObjBeforeIndex,
+  getChildObjAfterIndex,
+  getParentIndex,
+  getChildIndex,
+  getParent,
+  getChild,
+  getParentByOrder,
+} from "./Helpers/LayerPickerHelper";
+import data from './GEO_DATA.json';
 /* Sortable List */
 import {
-  arrayMove,
   SortableContainer,
   SortableElement,
   SortableHandle,
@@ -23,89 +35,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DragHandleIcon from "@material-ui/icons/DragHandle";
-
 import "./styles.css";
-
-const GEO_DATA = [
-  {
-    id: "water",
-    order: 0,
-    enabled: false,
-    children: [
-      {
-        id: "waterShed",
-        order: 0,
-        enabled: true,
-      },
-      {
-        id: "waterStreams",
-        order: 1,
-        enabled: true,
-      },
-      {
-        id: "waterBeds",
-        order: 2,
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "land",
-    order: 1,
-    enabled: true,
-    children: [
-      {
-        id: "forest",
-        order: 0,
-        enabled: false,
-      },
-      {
-        id: "first nations",
-        order: 1,
-        enabled: true,
-      },
-      {
-        id: "grassland",
-        order: 2,
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "thing",
-    order: 2,
-    enabled: false,
-    children: [
-      {
-        id: "something",
-        order: 0,
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "notwater",
-    order: 3,
-    enabled: false,
-    children: [
-      {
-        id: "waterShed",
-        order: 0,
-        enabled: true,
-      },
-      {
-        id: "waterStreams",
-        order: 1,
-        enabled: true,
-      },
-      {
-        id: "waterBeds",
-        order: 2,
-        enabled: true,
-      },
-    ],
-  },
-];
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -124,129 +54,11 @@ function App(props: any) {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(props.data);
 
-  const getObjectsBeforeIndex = (index: number) => {
-    const sorted = sortArray(objectState);
-    return [...sorted.slice(0, index)];
-  };
-  const getObjectsAfterIndex = (index: number) => {
-    const sorted = sortArray(objectState);
-    return [...sorted.slice(index + 1)];
-  };
-
-  const getChildObjBeforeIndex = (pIndex: number, cIndex: number) => {
-    const sorted = sortArray(objectState);
-    return [...(sorted[pIndex] as any).children.slice(0, cIndex)];
-  };
-  const getChildObjAfterIndex = (pIndex: number, cIndex: number) => {
-    const sorted = sortArray(objectState);
-    return [...(sorted[pIndex] as any).children.slice(cIndex + 1)];
-  };
-
-  /**
-   *
-   * @param parentType String variable
-   * @returns object and its containing variables
-   */
-  const getParent = (parentType: string) => {
-    // use array.filter here
-    return objectState[getParentIndex(parentType)];
-  };
-
-  const sortArray = (inputArray: []) => {
-    const returnVal = [...inputArray].sort((a, b) => {
-      if ((a as any).order > (b as any).order) {
-        return 1;
-      }
-
-      if ((a as any).order < (b as any).order) {
-        return -1;
-      }
-
-      return 0;
-    });
-    return returnVal;
-  };
-
-  /**
-   *
-   * @param parentType String variable
-   * @returns object and its containing variables
-   */
-  const getParentByOrder = (order: number) => {
-    // use array.filter here
-    const sortedArray = [...objectState].sort((a, b) => {
-      if ((a as any).order > (b as any).order) {
-        return 1;
-      }
-
-      if ((a as any).order < (b as any).order) {
-        return -1;
-      }
-
-      return 0;
-    });
-    const parent = sortedArray.filter((x) => (x as any).order === order)[0];
-    return { ...parent };
-  };
-
-  /**
-   * Used to get index of parent in JSON array
-   * @param parentType String variable
-   * @returns integer value
-   */
-  const getIndexByID = (id: string, inputArray: Object[]) => {
-    const sortedArray = [...inputArray].sort((a, b) => {
-      if ((a as any).order > (b as any).order) {
-        return 1;
-      }
-
-      if ((a as any).order < (b as any).order) {
-        return -1;
-      }
-
-      return 0;
-    });
-    return sortedArray.findIndex((x) => (x as any).id === id);
-  };
-
-  /**
-   * Used to get index of parent in JSON array
-   * @param parentType String variable
-   * @returns integer value
-   */
-  const getParentIndex = (id: string) => {
-    return getIndexByID(id, objectState);
-  };
-
-  /**
-   * Used to get index of child in parent children array
-   * @param parentType String variable to get Array value of parent
-   * @param childType String variable to get Array value of child under the parent value
-   * @returns integer value
-   */
-  const getChildIndex = (parentType: string, childType: string) => {
-    let g = objectState[getParentIndex(parentType)].children;
-    return getIndexByID(childType, g);
-  };
-
-  /**
-   *
-   * @param parentType String variable
-   * @param childType String variable
-   * @returns child component of parent children array
-   */
-  const getChild = (parentType: string, childType: string) => {
-    // use array.filter here  objectState.
-    return objectState[getParentIndex(parentType)].children[
-      getChildIndex(parentType, childType)
-    ];
-  };
-
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
-    let pIndex = getParentIndex(parentType);
-    let parentsBefore: Object[] = getObjectsBeforeIndex(pIndex);
-    let parentsAfter: Object[] = getObjectsAfterIndex(pIndex);
-    const oldParent = getParent(parentType);
+    let pIndex = getParentIndex(objectState,parentType);
+    let parentsBefore: Object[] = getObjectsBeforeIndex(objectState,pIndex);
+    let parentsAfter: Object[] = getObjectsAfterIndex(objectState,pIndex);
+    const oldParent = getParent(objectState, parentType);
     const updatedParent = { ...oldParent, ...fieldsToUpdate };
     setObjectState([...parentsBefore, updatedParent, ...parentsAfter] as any);
   };
@@ -257,20 +69,20 @@ function App(props: any) {
     fieldsToUpdate: Object
   ) => {
     // sort parents, get index of parent
-    let pIndex = getParentIndex(parentType);
+    let pIndex = getParentIndex(objectState,parentType);
     // sort child of specific parent, get index of child
-    let cIndex = getChildIndex(parentType, childType);
+    let cIndex = getChildIndex(objectState, parentType, childType);
     // get old child and overwrite fields with fields in fieldsToUpdate
-    const oldChild = getChild(parentType, childType);
+    const oldChild = getChild(objectState, parentType, childType);
     const updatedChild = { ...oldChild, ...fieldsToUpdate };
     // break up slicing into chunks:
-    let parentsBefore = getObjectsBeforeIndex(pIndex);
-    let parentsAfter = getObjectsAfterIndex(pIndex);
+    let parentsBefore = getObjectsBeforeIndex(objectState,pIndex);
+    let parentsAfter = getObjectsAfterIndex(objectState,pIndex);
     //spread to avoid reference issue when copying
-    const oldParent = getParent(parentType);
+    const oldParent = getParent(objectState, parentType);
 
-    const childrenBefore = getChildObjBeforeIndex(pIndex, cIndex);
-    const childrenAfter = getChildObjAfterIndex(pIndex, cIndex);
+    const childrenBefore = getChildObjBeforeIndex(objectState,pIndex, cIndex);
+    const childrenAfter = getChildObjAfterIndex(objectState, pIndex, cIndex);
 
     const newParent = {
       ...oldParent,
@@ -309,37 +121,33 @@ function App(props: any) {
   ));
 
   const onSortEnd = ({ oldIndex, newIndex }: any) => {
-    console.log("oldIndex:  :" + oldIndex);
-    console.log("newIndex:  :" + newIndex);
-
     if (newIndex > oldIndex) {
-      console.log("new index is bigger");
       // 3 to 5
       //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
       //      [{ a: 1 }, { b: 2 }, { d: 3 }, { e: 4 }, { c: 5 },{ f: 6 }];
 
       //update objects before old index left alone
-      let parentsBefore = getObjectsBeforeIndex(oldIndex);
+      let parentsBefore = getObjectsBeforeIndex(objectState,oldIndex);
 
       // update objects between old index and new index decrease
       //todo get inbetween
       let loopIndex = oldIndex + 1;
       let inBetween: any[] = [];
       while (loopIndex < newIndex) {
-        let obj: any = getParentByOrder(loopIndex);
+        let obj: any = getParentByOrder(objectState, loopIndex);
         obj.order = obj.order - 1;
         inBetween.push({ ...obj });
         loopIndex += 1;
       }
 
-      let objWeMoved: any = getParentByOrder(oldIndex);
+      let objWeMoved: any = getParentByOrder(objectState, oldIndex);
       objWeMoved.order = newIndex;
 
-      let objWeSwapped: any = getParentByOrder(newIndex);
+      let objWeSwapped: any = getParentByOrder(objectState, newIndex);
       objWeSwapped.order = newIndex - 1;
 
       //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(newIndex);
+      let parentsAfter = getObjectsAfterIndex(objectState,newIndex);
 
       const newState = [
         ...parentsBefore,
@@ -348,35 +156,32 @@ function App(props: any) {
         objWeSwapped,
         ...parentsAfter,
       ];
-      console.log("newstate");
-      console.dir(newState);
 
       setObjectState(newState);
     } else if (newIndex < oldIndex) {
-      console.log("new index is smaller");
       // 5 to 3
       //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
       //      [{ a: 1 }, { b: 2 }, { e: 3 }, { c: 4 }, { d: 5 }, ,{ f: 6 }];
-      let parentsBefore = getObjectsBeforeIndex(newIndex);
+      let parentsBefore = getObjectsBeforeIndex(objectState,newIndex);
 
       // update objects between old index and new index decrease
       let loopIndex = newIndex + 1;
       let inBetween: any[] = [];
       while (loopIndex < oldIndex) {
-        let obj: any = getParentByOrder(loopIndex);
+        let obj: any = getParentByOrder(objectState, loopIndex);
         obj.order = obj.order + 1;
         inBetween.push({ ...obj });
         loopIndex += 1;
       }
 
-      let objWeMoved: any = getParentByOrder(oldIndex);
+      let objWeMoved: any = getParentByOrder(objectState, oldIndex);
       objWeMoved.order = newIndex;
 
-      let objWeSwapped: any = getParentByOrder(newIndex);
+      let objWeSwapped: any = getParentByOrder(objectState, newIndex);
       objWeSwapped.order = newIndex + 1;
 
       //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(oldIndex);
+      let parentsAfter = getObjectsAfterIndex(objectState,oldIndex);
 
       const newState = [
         ...parentsBefore,
@@ -386,8 +191,6 @@ function App(props: any) {
         ...parentsAfter,
       ];
 
-      console.log("newstate");
-      console.dir(newState);
       setObjectState(newState);
     }
   };
@@ -442,11 +245,17 @@ function App(props: any) {
           ))}
         </Accordion>
               ))*/}
+              {
+                console.log()
+              }
+              {
+                console.log(getParent(objectState,"water"))
+              }
       <br />
 
       <Button
         onClick={() =>
-          updateParent("water", { enabled: !getParent("water").enabled })
+          updateChild("water", "waterShed", { enabled: !getChild(objectState, "water", "waterShed").enabled })
         }
       >
         click me
@@ -458,4 +267,4 @@ function App(props: any) {
 }
 
 const rootElement = document.getElementById("root");
-render(<App data={GEO_DATA} />, rootElement);
+render(<App data={data} />, rootElement);
