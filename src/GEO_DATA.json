@@ -1,0 +1,80 @@
+ [
+    {
+      "id": "water",
+      "order": 0,
+      "enabled": false,
+      "children": [
+        {
+          "id": "waterShed",
+          "order": 0,
+          "enabled": true
+        },
+        {
+          "id": "waterStreams",
+          "order": 1,
+          "enabled": true
+        },
+        {
+          "id": "waterBeds",
+          "order": 2,
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "land",
+      "order": 1,
+      "enabled": true,
+      "children": [
+        {
+          "id": "forest",
+          "order": 0,
+          "enabled": false
+        },
+        {
+          "id": "first nations",
+          "order": 1,
+          "enabled": true
+        },
+        {
+          "id": "grassland",
+          "order": 2,
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "thing",
+      "order": 2,
+      "enabled": false,
+      "children": [
+        {
+          "id": "something",
+          "order": 0,
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "notwater",
+      "order": 3,
+      "enabled": false,
+      "children": [
+        {
+          "id": "waterShed",
+          "order": 0,
+          "enabled": true
+        },
+        {
+          "id": "waterStreams",
+          "order": 1,
+          "enabled": true
+        },
+        {
+          "id": "waterBeds",
+          "order": 2,
+          "enabled": true
+        }
+      ]
+    }
+]
