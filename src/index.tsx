@@ -7,70 +7,37 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-
+/* HelperFiles */
+import {
+  sortArray,
+  getObjectsBeforeIndex,
+  getObjectsAfterIndex,
+  getChildObjBeforeIndex,
+  getChildObjAfterIndex,
+  getParentIndex,
+  getChildIndex,
+  getParent,
+  getChild,
+  getParentByOrder,
+  sortObject,
+} from "./Helpers/LayerPickerHelper";
+import data from "./GEO_DATA.json";
+/* Sortable List */
+import {
+  SortableContainer,
+  SortableElement,
+  SortableHandle,
+} from "react-sortable-hoc";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import DragHandleIcon from "@material-ui/icons/DragHandle";
 import "./styles.css";
-
-// todo:
-// change parent types also to be an array                                              :DONE
-// make a 'getParentLayer' function that returns the parent object with a given id      :DONE
-// look up Array.filter                                                                 :DONE
-// make a 'getChildLayer' function that returns the child object with a given id        :DONE
-// change parent accordion render to iterate over list                                  :DONE
-
-const GEO_DATA = [
-  {
-    id: "water",
-    order: 1,
-    enabled: false,
-    children: [
-      {
-        id: "waterShed",
-        order: 1,
-        enabled: true,
-      },
-      {
-        id: "waterStreams",
-        order: 2,
-        enabled: true,
-      },
-      {
-        id: "waterBeds",
-        order: 3,
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "land",
-    order: 2,
-    enabled: true,
-    children: [
-      {
-        id: "forest",
-        order: 1,
-        enabled: false,
-      },
-      {
-        id: "first nations",
-        order: 2,
-        enabled: true,
-      },
-      {
-        id: "grassland",
-        order: 3,
-        enabled: true,
-      },
-    ],
-  },
-  {
-    id: "thing",
-    order: 3,
-    enabled: false,
-    children: [],
-  },
-];
+import { flexbox } from "@material-ui/system";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,94 +47,25 @@ const useStyles = makeStyles((theme) => ({
     fontSize: theme.typography.pxToRem(15),
     fontWeight: theme.typography.fontWeightRegular,
   },
+  accordion: {
+    width: "100%",
+  },
+  div: {
+    display: "flex",
+    alignItems: "center",
+  },
 }));
 
 function App(props: any) {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(props.data);
-
-  const getObjectsBeforeIndex = (index: number) => {
-    return [...objectState.slice(0, index)];
-  };
-  const getObjectsAfterIndex = (index: number) => {
-    return [...objectState.slice(index + 1)];
-  };
-
-  const getChildObjBeforeIndex = (pIndex: number, cIndex: number) => {
-    return [...objectState[pIndex].children.slice(0, cIndex)];
-  };
-  const getChildObjAfterIndex = (pIndex: number, cIndex: number) => {
-    return [...objectState[pIndex].children.slice(cIndex + 1)];
-  };
-
-  /**
-   *
-   * @param parentType String variable
-   * @returns object and its containing variables
-   */
-  const getParent = (parentType: string) => {
-    // use array.filter here
-    return objectState[getParentIndex(parentType)];
-  };
-
-  /**
-   * Used to get index of parent in JSON array
-   * @param parentType String variable
-   * @returns integer value
-   */
-  const getIndexByID = (id: string, inputArray: Object[]) => {
-    const sortedArray = [...inputArray].sort((a, b) => {
-      if ((a as any).order > (b as any).order) {
-        return 1;
-      }
-
-      if ((a as any).order < (b as any).order) {
-        return -1;
-      }
-
-      return 0;
-    });
-    return sortedArray.findIndex((x) => (x as any).id === id);
-  };
-
-  /**
-   * Used to get index of parent in JSON array
-   * @param parentType String variable
-   * @returns integer value
-   */
-  const getParentIndex = (id: string) => {
-    return getIndexByID(id, objectState);
-  };
-
-  /**
-   * Used to get index of child in parent children array
-   * @param parentType String variable to get Array value of parent
-   * @param childType String variable to get Array value of child under the parent value
-   * @returns integer value
-   */
-  const getChildIndex = (parentType: string, childType: string) => {
-    let g = objectState[getParentIndex(parentType)].children;
-    return getIndexByID(childType, g);
-  };
-
-  /**
-   *
-   * @param parentType String variable
-   * @param childType String variable
-   * @returns child component of parent children array
-   */
-  const getChild = (parentType: string, childType: string) => {
-    // use array.filter here  objectState.
-    return objectState[getParentIndex(parentType)].children[
-      getChildIndex(parentType, childType)
-    ];
-  };
+  const [progress, setProgress] = useState(props.progress);
 
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
-    let pIndex = getParentIndex(parentType);
-    let parentsBefore: Object[] = getObjectsBeforeIndex(pIndex);
-    let parentsAfter: Object[] = getObjectsAfterIndex(pIndex);
-    const oldParent = getParent(parentType);
+    let pIndex = getParentIndex(objectState, parentType);
+    let parentsBefore: Object[] = getObjectsBeforeIndex(objectState, pIndex);
+    let parentsAfter: Object[] = getObjectsAfterIndex(objectState, pIndex);
+    const oldParent = getParent(objectState, parentType);
     const updatedParent = { ...oldParent, ...fieldsToUpdate };
     setObjectState([...parentsBefore, updatedParent, ...parentsAfter] as any);
   };
@@ -178,20 +76,20 @@ function App(props: any) {
     fieldsToUpdate: Object
   ) => {
     // sort parents, get index of parent
-    let pIndex = getParentIndex(parentType);
+    let pIndex = getParentIndex(objectState, parentType);
     // sort child of specific parent, get index of child
-    let cIndex = getChildIndex(parentType, childType);
+    let cIndex = getChildIndex(objectState, parentType, childType);
     // get old child and overwrite fields with fields in fieldsToUpdate
-    const oldChild = getChild(parentType, childType);
+    const oldChild = getChild(objectState, parentType, childType);
     const updatedChild = { ...oldChild, ...fieldsToUpdate };
     // break up slicing into chunks:
-    let parentsBefore = getObjectsBeforeIndex(pIndex);
-    let parentsAfter = getObjectsAfterIndex(pIndex);
+    let parentsBefore = getObjectsBeforeIndex(objectState, pIndex);
+    let parentsAfter = getObjectsAfterIndex(objectState, pIndex);
     //spread to avoid reference issue when copying
-    const oldParent = getParent(parentType);
+    const oldParent = getParent(objectState, parentType);
 
-    const childrenBefore = getChildObjBeforeIndex(pIndex, cIndex);
-    const childrenAfter = getChildObjAfterIndex(pIndex, cIndex);
+    const childrenBefore = getChildObjBeforeIndex(objectState, pIndex, cIndex);
+    const childrenAfter = getChildObjAfterIndex(objectState, pIndex, cIndex);
 
     const newParent = {
       ...oldParent,
@@ -201,8 +99,81 @@ function App(props: any) {
     setObjectState([...parentsBefore, newParent, ...parentsAfter] as any);
   };
 
+  /* Sortable List */
+  const DragHandle = SortableHandle(() => (
+    <ListItemIcon>
+      <DragHandleIcon />
+    </ListItemIcon>
+  ));
+
+  const SortableItem = SortableElement(({ parent }: any) => (
+    <ListItem ContainerComponent="div">
+      <ListItemText />
+      <Accordion className={classes.accordion}>
+        <div className={classes.div}>
+          <Checkbox
+            checked={parent.enabled}
+            name={parent.id}
+            onChange={() => {
+              updateParent(parent.id, {
+                enabled: !getParent(objectState, parent.id).enabled,
+              });
+            }}
+          />
+          <AccordionSummary className={classes.heading} id={parent.id}>
+            {parent.id}
+          </AccordionSummary>
+          <div className="divR">
+            <CircularProgress variant="determinate" value={parent.loaded} />
+          </div>
+        </div>
+        {parent.children.map((child: any) => (
+          <div className="classes.div">
+            &emsp;
+            <AccordionDetails>
+              <Checkbox
+                checked={child.enabled}
+                name={child.id}
+                onChange={() => {
+                  updateChild(parent.id, child.id, {
+                    enabled: !getChild(objectState, parent.id, child.id)
+                      .enabled,
+                  });
+                }}
+              />
+              {child.id}
+              <CircularProgress variant="determinate" value={child.loaded} />
+            </AccordionDetails>
+          </div>
+        ))}
+      </Accordion>
+      <ListItemSecondaryAction>
+        <DragHandle />
+      </ListItemSecondaryAction>
+    </ListItem>
+  ));
+
+  const SortableListContainer = SortableContainer(({ items }: any) => (
+    <List>
+      {items.map((parent: { id: string; order: number }) => (
+        <SortableItem key={parent.id} index={parent.order} parent={parent} />
+      ))}
+    </List>
+  ));
+
+  const onSortEnd = ({ oldIndex, newIndex }: any) => {
+    const returnVal = sortObject(objectState, oldIndex, newIndex);
+    setObjectState(returnVal);
+  };
+
   return (
     <div className={classes.root}>
+      <SortableListContainer
+        items={sortArray(objectState)}
+        onSortEnd={onSortEnd}
+        useDragHandle={true}
+        lockAxis="y"
+      />
       {/*
       objectState.map((parent: any) => (
         <Accordion>
@@ -245,23 +216,23 @@ function App(props: any) {
           ))}
         </Accordion>
               ))*/}
-        {
-          
-        }
+
       <br />
 
       <Button
         onClick={() =>
-          updateParent("water", { enabled: !getParent("water").enabled })
+          updateParent("water", {
+            enabled: !getParent(objectState, "water").enabled,
+          })
         }
       >
         click me
       </Button>
 
-      <pre>{JSON.stringify(objectState, null, 2)}</pre>
+      <pre>{JSON.stringify(sortArray(objectState), null, 2)}</pre>
     </div>
   );
 }
 
 const rootElement = document.getElementById("root");
-render(<App data={GEO_DATA} />, rootElement);
+render(<App data={data} />, rootElement);
