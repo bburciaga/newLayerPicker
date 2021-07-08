@@ -10,9 +10,9 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 /* HelperFiles */
-import { 
+import {
   sortArray,
-  getObjectsBeforeIndex, 
+  getObjectsBeforeIndex,
   getObjectsAfterIndex,
   getChildObjBeforeIndex,
   getChildObjAfterIndex,
@@ -36,6 +36,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DragHandleIcon from "@material-ui/icons/DragHandle";
 import "./styles.css";
+import { flexbox } from "@material-ui/system";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,8 +47,12 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: theme.typography.fontWeightRegular,
   },
   accordion: {
-    width: "100%",
+    width: "100%"
   },
+  div: {
+    display: "flex",
+    alignItems: "center"
+  }
 }));
 
 function App(props: any) {
@@ -55,9 +60,9 @@ function App(props: any) {
   const [objectState, setObjectState] = useState(props.data);
 
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
-    let pIndex = getParentIndex(objectState,parentType);
-    let parentsBefore: Object[] = getObjectsBeforeIndex(objectState,pIndex);
-    let parentsAfter: Object[] = getObjectsAfterIndex(objectState,pIndex);
+    let pIndex = getParentIndex(objectState, parentType);
+    let parentsBefore: Object[] = getObjectsBeforeIndex(objectState, pIndex);
+    let parentsAfter: Object[] = getObjectsAfterIndex(objectState, pIndex);
     const oldParent = getParent(objectState, parentType);
     const updatedParent = { ...oldParent, ...fieldsToUpdate };
     setObjectState([...parentsBefore, updatedParent, ...parentsAfter] as any);
@@ -69,19 +74,19 @@ function App(props: any) {
     fieldsToUpdate: Object
   ) => {
     // sort parents, get index of parent
-    let pIndex = getParentIndex(objectState,parentType);
+    let pIndex = getParentIndex(objectState, parentType);
     // sort child of specific parent, get index of child
     let cIndex = getChildIndex(objectState, parentType, childType);
     // get old child and overwrite fields with fields in fieldsToUpdate
     const oldChild = getChild(objectState, parentType, childType);
     const updatedChild = { ...oldChild, ...fieldsToUpdate };
     // break up slicing into chunks:
-    let parentsBefore = getObjectsBeforeIndex(objectState,pIndex);
-    let parentsAfter = getObjectsAfterIndex(objectState,pIndex);
+    let parentsBefore = getObjectsBeforeIndex(objectState, pIndex);
+    let parentsAfter = getObjectsAfterIndex(objectState, pIndex);
     //spread to avoid reference issue when copying
     const oldParent = getParent(objectState, parentType);
 
-    const childrenBefore = getChildObjBeforeIndex(objectState,pIndex, cIndex);
+    const childrenBefore = getChildObjBeforeIndex(objectState, pIndex, cIndex);
     const childrenAfter = getChildObjAfterIndex(objectState, pIndex, cIndex);
 
     const newParent = {
@@ -99,12 +104,31 @@ function App(props: any) {
     </ListItemIcon>
   ));
 
-  const SortableItem = SortableElement(({ text }: any) => (
+  const SortableItem = SortableElement(({ parent }: any) => (
     <ListItem ContainerComponent="div">
-      <ListItemText primary={text} />
+      <ListItemText />
       <Accordion className={classes.accordion}>
-        <AccordionSummary id={text}>test</AccordionSummary>
-        <AccordionDetails></AccordionDetails>
+        <div className={classes.div}>
+          <Checkbox checked={parent.enabled} name={parent.id}
+            onChange={() => {
+              updateParent(parent.id, { enabled: !getParent(objectState, parent.id).enabled })
+            }} />
+          <AccordionSummary className={classes.heading} id={parent.id}>
+            {parent.id}
+          </AccordionSummary>
+        </div>
+        {parent.children.map((child: any) => (
+          <div className={classes.div}>
+            &emsp;
+            <Checkbox checked={child.enabled} name={child.id}
+              onChange={() => {
+                updateChild(parent.id, child.id, { enabled: !getChild(objectState, parent.id, child.id).enabled })
+              }} />
+            <AccordionDetails>
+              {child.id}
+            </AccordionDetails>
+          </div>
+        ))}
       </Accordion>
       <ListItemSecondaryAction>
         <DragHandle />
@@ -115,7 +139,7 @@ function App(props: any) {
   const SortableListContainer = SortableContainer(({ items }: any) => (
     <List>
       {items.map((parent: { id: string; order: number }) => (
-        <SortableItem key={parent.id} index={parent.order} text={parent.id} />
+        <SortableItem key={parent.id} index={parent.order} parent={parent} />
       ))}
     </List>
   ));
@@ -127,7 +151,7 @@ function App(props: any) {
       //      [{ a: 1 }, { b: 2 }, { d: 3 }, { e: 4 }, { c: 5 },{ f: 6 }];
 
       //update objects before old index left alone
-      let parentsBefore = getObjectsBeforeIndex(objectState,oldIndex);
+      let parentsBefore = getObjectsBeforeIndex(objectState, oldIndex);
 
       // update objects between old index and new index decrease
       //todo get inbetween
@@ -147,7 +171,7 @@ function App(props: any) {
       objWeSwapped.order = newIndex - 1;
 
       //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(objectState,newIndex);
+      let parentsAfter = getObjectsAfterIndex(objectState, newIndex);
 
       const newState = [
         ...parentsBefore,
@@ -162,7 +186,7 @@ function App(props: any) {
       // 5 to 3
       //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
       //      [{ a: 1 }, { b: 2 }, { e: 3 }, { c: 4 }, { d: 5 }, ,{ f: 6 }];
-      let parentsBefore = getObjectsBeforeIndex(objectState,newIndex);
+      let parentsBefore = getObjectsBeforeIndex(objectState, newIndex);
 
       // update objects between old index and new index decrease
       let loopIndex = newIndex + 1;
@@ -181,7 +205,7 @@ function App(props: any) {
       objWeSwapped.order = newIndex + 1;
 
       //leave objects after alone
-      let parentsAfter = getObjectsAfterIndex(objectState,oldIndex);
+      let parentsAfter = getObjectsAfterIndex(objectState, oldIndex);
 
       const newState = [
         ...parentsBefore,
@@ -245,17 +269,12 @@ function App(props: any) {
           ))}
         </Accordion>
               ))*/}
-              {
-                console.log()
-              }
-              {
-                console.log(getParent(objectState,"water"))
-              }
+
       <br />
 
       <Button
         onClick={() =>
-          updateChild("water", "waterShed", { enabled: !getChild(objectState, "water", "waterShed").enabled })
+          updateParent("water", { enabled: !getParent(objectState, "water").enabled })
         }
       >
         click me
