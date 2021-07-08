@@ -7,8 +7,8 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 /* HelperFiles */
 import {
   sortArray,
@@ -58,6 +58,8 @@ const useStyles = makeStyles((theme) => ({
 function App(props: any) {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(props.data);
+  const [progress, setProgress] = useState(props.progress);
+
 
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
     let pIndex = getParentIndex(objectState, parentType);
@@ -116,18 +118,22 @@ function App(props: any) {
           <AccordionSummary className={classes.heading} id={parent.id}>
             {parent.id}
           </AccordionSummary>
+          <div className="divR">
+          <CircularProgress variant="determinate" value={parent.loaded} />
+          </div>
         </div>
         {parent.children.map((child: any) => (
-          <div>
+          <div className="classes.div">
             &emsp;
-          <AccordionDetails>
-            
-            <Checkbox checked={child.enabled} name={child.id}
-              onChange={() => {
-                updateChild(parent.id, child.id, { enabled: !getChild(objectState, parent.id, child.id).enabled })
-              }} />
-            {child.id}
-          </AccordionDetails>
+            <AccordionDetails>
+
+              <Checkbox checked={child.enabled} name={child.id}
+                onChange={() => {
+                  updateChild(parent.id, child.id, { enabled: !getChild(objectState, parent.id, child.id).enabled })
+                }} />
+              {child.id}
+              <CircularProgress variant="determinate" value={child.loaded} />
+            </AccordionDetails>
           </div>
         ))}
       </Accordion>
