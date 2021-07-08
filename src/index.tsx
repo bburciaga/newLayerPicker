@@ -118,15 +118,16 @@ function App(props: any) {
           </AccordionSummary>
         </div>
         {parent.children.map((child: any) => (
-          <div className={classes.div}>
+          <div>
             &emsp;
+          <AccordionDetails>
+            
             <Checkbox checked={child.enabled} name={child.id}
               onChange={() => {
                 updateChild(parent.id, child.id, { enabled: !getChild(objectState, parent.id, child.id).enabled })
               }} />
-            <AccordionDetails>
-              {child.id}
-            </AccordionDetails>
+            {child.id}
+          </AccordionDetails>
           </div>
         ))}
       </Accordion>
@@ -152,6 +153,7 @@ function App(props: any) {
 
       //update objects before old index left alone
       let parentsBefore = getObjectsBeforeIndex(objectState, oldIndex);
+      console.log("parentsB4:", parentsBefore);
 
       // update objects between old index and new index decrease
       //todo get inbetween
@@ -162,32 +164,37 @@ function App(props: any) {
         obj.order = obj.order - 1;
         inBetween.push({ ...obj });
         loopIndex += 1;
+        console.log("obj:", obj);
       }
 
       let objWeMoved: any = getParentByOrder(objectState, oldIndex);
       objWeMoved.order = newIndex;
+      console.log("objWeMoved: ", objWeMoved);
 
       let objWeSwapped: any = getParentByOrder(objectState, newIndex);
       objWeSwapped.order = newIndex - 1;
+      console.log("objWeSwapped: ", objWeSwapped);
 
       //leave objects after alone
       let parentsAfter = getObjectsAfterIndex(objectState, newIndex);
+      console.log("parentsAfter: ", parentsAfter);
 
       const newState = [
         ...parentsBefore,
         ...inBetween,
-        objWeMoved,
         objWeSwapped,
+        objWeMoved,
         ...parentsAfter,
       ];
 
+      console.log("newState: ", newState);
       setObjectState(newState);
     } else if (newIndex < oldIndex) {
       // 5 to 3
       //      [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }, { e: 5 }, { f: 6 }];
       //      [{ a: 1 }, { b: 2 }, { e: 3 }, { c: 4 }, { d: 5 }, ,{ f: 6 }];
       let parentsBefore = getObjectsBeforeIndex(objectState, newIndex);
-
+      console.log("parentsB4:", parentsBefore);
       // update objects between old index and new index decrease
       let loopIndex = newIndex + 1;
       let inBetween: any[] = [];
@@ -196,16 +203,20 @@ function App(props: any) {
         obj.order = obj.order + 1;
         inBetween.push({ ...obj });
         loopIndex += 1;
+        console.log("obj:", obj);
       }
 
       let objWeMoved: any = getParentByOrder(objectState, oldIndex);
       objWeMoved.order = newIndex;
+      console.log("objWeMoved: ", objWeMoved);
 
       let objWeSwapped: any = getParentByOrder(objectState, newIndex);
       objWeSwapped.order = newIndex + 1;
+      console.log("objWeSwapped: ", objWeSwapped);
 
       //leave objects after alone
       let parentsAfter = getObjectsAfterIndex(objectState, oldIndex);
+      console.log("parentsAfter: ", parentsAfter);
 
       const newState = [
         ...parentsBefore,
@@ -215,6 +226,7 @@ function App(props: any) {
         ...parentsAfter,
       ];
 
+      console.log("newState: ", newState);
       setObjectState(newState);
     }
   };
