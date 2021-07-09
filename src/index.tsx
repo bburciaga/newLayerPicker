@@ -38,8 +38,8 @@ import {
 } from "./Helpers/LayerPickerHelper";
 import data from "./GEO_DATA.json";
 /* Grid imports */
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
+import Paper from "@material-ui/core/Paper";
+import Grid from "@material-ui/core/Grid";
 import ColorPicker from "material-ui-color-picker";
 
 const useStyles = makeStyles((theme) => ({
@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
   div: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
 }));
 
@@ -110,79 +110,102 @@ function App(props: any) {
     </ListItemIcon>
   ));
 
-  const SortableItem = SortableElement(({ parent }: any) => (
-    <ListItem ContainerComponent="div">
-      <ListItemText />
-      <Accordion accessKey='expanded' className={classes.accordion}
-         >
-        <Grid container justify="space-evenly">
-          <Grid item xs={3}>
-            <Checkbox
-              checked={parent.enabled}
-              name={parent.id}
-              onChange={() => {
-                updateParent(parent.id, {
-                  enabled: !getParent(objectState, parent.id).enabled,
-                });
-              }}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}
-              className={classes.heading} id={parent.id} >
-              {parent.id}
-            </AccordionSummary>
-          </Grid>
-          <Grid item xs={1}>
-            <CircularProgress variant="determinate" value={parent.loaded} />
-          </Grid>
-          <Grid item xs={1}>
-            <ColorPicker name='color' defaultValue={parent.colorCode}
-              onChange={(color: any) =>
-                updateParent(parent.id, { colorCode: color })} />
-          </Grid>
-        </Grid>
-        {parent.children.map((child: any) => (
-          <Grid container direction="row" justify="space-evenly" >
-            <Grid item xs={1}>
+  const SortableParentLayer = SortableElement(({ parent }: any) => {
+    const onParentLayerAccordionChange = (event: any, expanded: any) => {
+      updateParent((parent as any).id, { expanded: expanded });
+    };
+    return (
+      <ListItem ContainerComponent="div">
+        <ListItemText />
+        <Accordion
+          expanded={parent.expanded}
+          onChange={onParentLayerAccordionChange}
+          className={classes.accordion}
+        >
+          <Grid container justify="space-evenly">
+            <Grid item xs={3}>
               <Checkbox
-                checked={child.enabled}
-                name={child.id}
+                checked={parent.enabled}
+                name={parent.id}
                 onChange={() => {
-                  updateChild(parent.id, child.id, {
-                    enabled: !getChild(objectState, parent.id, child.id)
-                      .enabled,
+                  updateParent(parent.id, {
+                    enabled: !getParent(objectState, parent.id).enabled,
                   });
                 }}
               />
             </Grid>
-
             <Grid item xs={3}>
-              {child.id}
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                className={classes.heading}
+                id={parent.id}
+              >
+                {parent.id}
+              </AccordionSummary>
             </Grid>
             <Grid item xs={1}>
-              <CircularProgress variant="determinate" value={child.loaded} />
+              <CircularProgress variant="determinate" value={parent.loaded} />
             </Grid>
             <Grid item xs={1}>
-              <ColorPicker name='color' defaultValue={child.colorCode}
+              <ColorPicker
+                name="color"
+                defaultValue={parent.colorCode}
                 onChange={(color: any) =>
-                  updateChild(parent.id, child.id, {
-                    colorCode: color
-                  })} />
+                  updateParent(parent.id, { colorCode: color })
+                }
+              />
             </Grid>
           </Grid>
-        ))}
-      </Accordion>
-      <ListItemSecondaryAction>
-        <DragHandle />
-      </ListItemSecondaryAction>
-    </ListItem>
-  ));
+          {parent.children.map((child: any) => (
+            <Grid container direction="row" justify="space-evenly">
+              <Grid item xs={1}>
+                <Checkbox
+                  checked={child.enabled}
+                  name={child.id}
+                  onChange={() => {
+                    updateChild(parent.id, child.id, {
+                      enabled: !getChild(objectState, parent.id, child.id)
+                        .enabled,
+                    });
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={3}>
+                {child.id}
+              </Grid>
+              <Grid item xs={1}>
+                <CircularProgress variant="determinate" value={child.loaded} />
+              </Grid>
+              <Grid item xs={1}>
+                <ColorPicker
+                  name="color"
+                  defaultValue={child.colorCode}
+                  onChange={(color: any) =>
+                    updateChild(parent.id, child.id, {
+                      colorCode: color,
+                    })
+                  }
+                />
+              </Grid>
+            </Grid>
+          ))}
+        </Accordion>
+        <ListItemSecondaryAction>
+          <DragHandle />
+        </ListItemSecondaryAction>
+      </ListItem>
+    );
+  });
 
   const SortableListContainer = SortableContainer(({ items }: any) => (
     <List>
       {items.map((parent: { id: string; order: number }) => (
-        <SortableItem key={parent.id} index={parent.order} parent={parent} />
+        <SortableParentLayer
+          key={parent.id}
+          index={parent.order}
+          parent={parent}
+        />
       ))}
     </List>
   ));
