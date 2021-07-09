@@ -113,7 +113,8 @@ function App(props: any) {
   const SortableItem = SortableElement(({ parent }: any) => (
     <ListItem ContainerComponent="div">
       <ListItemText />
-      <Accordion className={classes.accordion} >
+      <Accordion accessKey='expanded' className={classes.accordion}
+         >
         <Grid container justify="space-evenly">
           <Grid item xs={3}>
             <Checkbox
@@ -128,7 +129,7 @@ function App(props: any) {
           </Grid>
           <Grid item xs={3}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}
-              className={classes.heading} id={parent.id}>
+              className={classes.heading} id={parent.id} >
               {parent.id}
             </AccordionSummary>
           </Grid>
@@ -137,38 +138,38 @@ function App(props: any) {
           </Grid>
           <Grid item xs={1}>
             <ColorPicker name='color' defaultValue={parent.colorCode}
-              onChange={(color:any) => 
-              updateParent(parent.id, {colorCode: color})} />
+              onChange={(color: any) =>
+                updateParent(parent.id, { colorCode: color })} />
           </Grid>
         </Grid>
         {parent.children.map((child: any) => (
           <Grid container direction="row" justify="space-evenly" >
             <Grid item xs={1}>
-                <Checkbox
-                  checked={child.enabled}
-                  name={child.id}
-                  onChange={() => {
-                    updateChild(parent.id, child.id, {
-                      enabled: !getChild(objectState, parent.id, child.id)
-                        .enabled,
-                    });
-                  }}
-                />
-              </Grid>
-              
-              <Grid item xs={3}>
-                {child.id}
-              </Grid>
-              <Grid item xs={1}>
-                <CircularProgress variant="determinate" value={child.loaded} />
-              </Grid>
-              <Grid item xs={1}>
-            <ColorPicker name='color' defaultValue={child.colorCode}
-              onChange={(color:any) => 
-              updateChild(parent.id, child.id, {
-                colorCode: color
-              })} />
-          </Grid>
+              <Checkbox
+                checked={child.enabled}
+                name={child.id}
+                onChange={() => {
+                  updateChild(parent.id, child.id, {
+                    enabled: !getChild(objectState, parent.id, child.id)
+                      .enabled,
+                  });
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={3}>
+              {child.id}
+            </Grid>
+            <Grid item xs={1}>
+              <CircularProgress variant="determinate" value={child.loaded} />
+            </Grid>
+            <Grid item xs={1}>
+              <ColorPicker name='color' defaultValue={child.colorCode}
+                onChange={(color: any) =>
+                  updateChild(parent.id, child.id, {
+                    colorCode: color
+                  })} />
+            </Grid>
           </Grid>
         ))}
       </Accordion>
