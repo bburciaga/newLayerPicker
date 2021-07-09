@@ -9,6 +9,19 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Checkbox from "@material-ui/core/Checkbox";
+import {
+  SortableContainer,
+  SortableElement,
+  SortableHandle,
+} from "react-sortable-hoc";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import DragHandleIcon from "@material-ui/icons/DragHandle";
+import "./styles.css";
+import { flexbox } from "@material-ui/system";
 /* HelperFiles */
 import {
   sortArray,
@@ -24,20 +37,10 @@ import {
   sortObject,
 } from "./Helpers/LayerPickerHelper";
 import data from "./GEO_DATA.json";
-/* Sortable List */
-import {
-  SortableContainer,
-  SortableElement,
-  SortableHandle,
-} from "react-sortable-hoc";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import DragHandleIcon from "@material-ui/icons/DragHandle";
-import "./styles.css";
-import { flexbox } from "@material-ui/system";
+/* Grid imports */
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import ColorPicker from "material-ui-color-picker";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,6 +56,7 @@ const useStyles = makeStyles((theme) => ({
   div: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "center"
   },
 }));
 
@@ -109,42 +113,63 @@ function App(props: any) {
   const SortableItem = SortableElement(({ parent }: any) => (
     <ListItem ContainerComponent="div">
       <ListItemText />
-      <Accordion className={classes.accordion}>
-        <div className={classes.div}>
-          <Checkbox
-            checked={parent.enabled}
-            name={parent.id}
-            onChange={() => {
-              updateParent(parent.id, {
-                enabled: !getParent(objectState, parent.id).enabled,
-              });
-            }}
-          />
-          <AccordionSummary className={classes.heading} id={parent.id}>
-            {parent.id}
-          </AccordionSummary>
-          <div className="divR">
+      <Accordion className={classes.accordion} >
+        <Grid container justify="space-evenly">
+          <Grid item xs={3}>
+            <Checkbox
+              checked={parent.enabled}
+              name={parent.id}
+              onChange={() => {
+                updateParent(parent.id, {
+                  enabled: !getParent(objectState, parent.id).enabled,
+                });
+              }}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}
+              className={classes.heading} id={parent.id}>
+              {parent.id}
+            </AccordionSummary>
+          </Grid>
+          <Grid item xs={1}>
             <CircularProgress variant="determinate" value={parent.loaded} />
-          </div>
-        </div>
+          </Grid>
+          <Grid item xs={1}>
+            <ColorPicker name='color' defaultValue={parent.colorCode}
+              onChange={(color:any) => 
+              updateParent(parent.id, {colorCode: color})} />
+          </Grid>
+        </Grid>
         {parent.children.map((child: any) => (
-          <div className="classes.div">
-            &emsp;
-            <AccordionDetails>
-              <Checkbox
-                checked={child.enabled}
-                name={child.id}
-                onChange={() => {
-                  updateChild(parent.id, child.id, {
-                    enabled: !getChild(objectState, parent.id, child.id)
-                      .enabled,
-                  });
-                }}
-              />
-              {child.id}
-              <CircularProgress variant="determinate" value={child.loaded} />
-            </AccordionDetails>
-          </div>
+          <Grid container direction="row" justify="space-evenly" >
+            <Grid item xs={1}>
+                <Checkbox
+                  checked={child.enabled}
+                  name={child.id}
+                  onChange={() => {
+                    updateChild(parent.id, child.id, {
+                      enabled: !getChild(objectState, parent.id, child.id)
+                        .enabled,
+                    });
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={3}>
+                {child.id}
+              </Grid>
+              <Grid item xs={1}>
+                <CircularProgress variant="determinate" value={child.loaded} />
+              </Grid>
+              <Grid item xs={1}>
+            <ColorPicker name='color' defaultValue={child.colorCode}
+              onChange={(color:any) => 
+              updateChild(parent.id, child.id, {
+                colorCode: color
+              })} />
+          </Grid>
+          </Grid>
         ))}
       </Accordion>
       <ListItemSecondaryAction>
@@ -174,60 +199,8 @@ function App(props: any) {
         useDragHandle={true}
         lockAxis="y"
       />
-      {/*
-      objectState.map((parent: any) => (
-        <Accordion>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="water-content"
-            id={parent.id}
-          >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={parent.enabled}
-                  onChange={() => {
-                    updateParent(parent.id, { enabled: !getParent(parent.id).enabled });
-                  }}
-                  name={parent.id}
-                />
-              }
-              className={classes.heading}
-              label={parent.id}
-            />
-          </AccordionSummary>
-          {parent.children.map((child: any) => (
-            <AccordionDetails id={child.id}>
-              &emsp;
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={child.enabled}
-                    onChange={() => {
-                      updateChild(parent.id, child.id, { enabled: !getChild(parent.id, child.id).enabled });
-                    }}
-                    name={child.id}
-                  />
-                }
-                className={classes.heading}
-                label={child.id}
-              />
-            </AccordionDetails>
-          ))}
-        </Accordion>
-              ))*/}
 
       <br />
-
-      <Button
-        onClick={() =>
-          updateParent("water", {
-            enabled: !getParent(objectState, "water").enabled,
-          })
-        }
-      >
-        click me
-      </Button>
 
       <pre>{JSON.stringify(sortArray(objectState), null, 2)}</pre>
     </div>
