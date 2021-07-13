@@ -239,6 +239,8 @@ export const sortObject = (
 
     console.log("newState: ", newState);
     returnVal = newState;
+  } else {
+      return objectState;
   }
   return returnVal;
 };
