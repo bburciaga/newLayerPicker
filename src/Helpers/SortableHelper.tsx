@@ -216,9 +216,9 @@ export function LayerPicker(props: any) {
         lockAxis="y"
       />
 
-      <br />
+      {/*<br />*/}
 
-      <pre>{JSON.stringify(sortArray(objectState), null, 2)}</pre>
+      {/*<pre>{JSON.stringify(sortArray(objectState), null, 2)}</pre>*/}
     </div>
     )
 }
