@@ -1,11 +1,9 @@
-import React, { useState, useEffect, Children } from "react";
+import React, { useState } from "react";
 import { render } from "react-dom";
-import Button from "@material-ui/core/Button";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -21,7 +19,6 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import DragHandleIcon from "@material-ui/icons/DragHandle";
 import "./styles.css";
-import { flexbox } from "@material-ui/system";
 /* HelperFiles */
 import {
   sortArray,
@@ -37,8 +34,6 @@ import {
   sortObject,
 } from "./Helpers/LayerPickerHelper";
 import data from "./GEO_DATA.json";
-/* Grid imports */
-import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import ColorPicker from "material-ui-color-picker";
 
@@ -63,7 +58,8 @@ const useStyles = makeStyles((theme) => ({
 function App(props: any) {
   const classes = useStyles();
   const [objectState, setObjectState] = useState(props.data);
-  const [progress, setProgress] = useState(props.progress);
+  // Progress bar
+  // const [progress, setProgress] = useState(props.progress);
 
   const updateParent = (parentType: string, fieldsToUpdate: Object) => {
     let pIndex = getParentIndex(objectState, parentType);
