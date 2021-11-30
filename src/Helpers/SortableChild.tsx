@@ -3,7 +3,8 @@ import {
   getChildrenAfterIndex,
   getChildrenBeforeIndex,
   DragHandle,
-  getChildByOrder
+  getChildByOrder,
+  sortArray
 } from "./LayerPickerHelper";
 import { Grid, List, Typography } from "@material-ui/core";
 import React, { useState } from "react";
@@ -43,11 +44,11 @@ const sortChildren = (children: any[], oldIndex: number, newIndex: number) => {
   } else if (newIndex < oldIndex) {
     let childrenBefore = getChildrenBeforeIndex(children, newIndex);
 
-    let loopIndex = oldIndex + 1;
+    let loopIndex = newIndex + 1;
     let inBetween: any[] = [];
-    while (loopIndex < newIndex) {
-      let obj: any = getChildByOrder(children, oldIndex);
-      obj.order = obj.order - 1;
+    while (loopIndex < oldIndex) {
+      let obj: any = getChildByOrder(children, loopIndex);
+      obj.order = obj.order + 1;
       inBetween.push({ ...obj });
       loopIndex += 1;
     }
@@ -135,7 +136,7 @@ export const SortableChild = (props: any) => {
     const returnVal = sortChildren(props.parent.children, oldIndex, newIndex);
     updateParent(
       props.parent.id,
-      { children: returnVal },
+      { children: sortArray(returnVal) },
       props.objectState,
       props.setObjectState
     );
@@ -146,7 +147,7 @@ export const SortableChild = (props: any) => {
     <>
       {props.children && (
         <SortableListContainer
-          items={props.children}
+          items={sortArray(props.children)}
           onSortEnd={onSortEnd}
           useDragHandle={true}
           lockAxis="y"
