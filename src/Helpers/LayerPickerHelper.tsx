@@ -1,3 +1,8 @@
+import { ListItemIcon } from "@material-ui/core";
+import React from "react";
+import { SortableHandle } from "react-sortable-hoc";
+import DragHandleIcon from "@material-ui/icons/DragHandle";
+
 /**
  *
  * @param inputArray
@@ -56,13 +61,9 @@ export function getObjectsAfterIndex(inputArray: any[], index: number) {
  * @param cIndex
  * @returns
  */
-export function getChildObjBeforeIndex(
-  inputArray: any[],
-  pIndex: number,
-  cIndex: number
-) {
-  const sorted = sortArray(inputArray);
-  return [...(sorted[pIndex] as any).children.slice(0, cIndex)];
+export function getChildrenBeforeIndex(children: any[], cIndex: number) {
+  const sorted = sortArray(children as any[]);
+  return [...(sorted as any).slice(0, cIndex)];
 }
 
 /**
@@ -72,13 +73,9 @@ export function getChildObjBeforeIndex(
  * @param cIndex
  * @returns
  */
-export function getChildObjAfterIndex(
-  inputArray: any[],
-  pIndex: number,
-  cIndex: number
-) {
-  const sorted = sortArray(inputArray);
-  return [...(sorted[pIndex] as any).children.slice(cIndex + 1)];
+export function getChildrenAfterIndex(children: any[], cIndex: number) {
+  const sorted = sortArray(children);
+  return [...(sorted as any).slice(cIndex + 1)];
 }
 
 /**
@@ -150,6 +147,12 @@ export function getParentByOrder(inputArray: any[], order: number) {
   return { ...parent };
 }
 
+export function getChildByOrder(children: any[], order: number) {
+  const sorted = sortArray(children);
+  const child = sorted.filter((x) => x.order === order)[0];
+  return { ...child };
+}
+
 export const sortObject = (
   objectState: any[],
   oldIndex: number,
@@ -194,7 +197,7 @@ export const sortObject = (
       ...inBetween,
       objWeSwapped,
       objWeMoved,
-      ...parentsAfter,
+      ...parentsAfter
     ];
 
     console.log("newState: ", sortArray(newState));
@@ -234,13 +237,19 @@ export const sortObject = (
       ...inBetween,
       objWeMoved,
       objWeSwapped,
-      ...parentsAfter,
+      ...parentsAfter
     ];
 
     console.log("newState: ", newState);
     returnVal = newState;
   } else {
-      return objectState;
+    return objectState;
   }
   return returnVal;
 };
+
+export const DragHandle = SortableHandle(() => (
+  <ListItemIcon>
+    <DragHandleIcon />
+  </ListItemIcon>
+));
